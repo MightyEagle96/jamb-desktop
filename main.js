@@ -5,7 +5,7 @@ const si = require("systeminformation");
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain, MenuItem } =
   electron;
 
-let mainWindow, splashScreen, examinationScreen, networkTestScreen;
+let connectToServerScreen, splashScreen, examinationScreen, networkTestScreen;
 
 let serverIpAddress, testData;
 
@@ -90,7 +90,7 @@ function GetSystemConfiguration() {
     ) {
       splashScreen.close();
 
-      createWindow();
+      CreateConnectToServerScreen();
       clearInterval(complete);
     }
   }, 1000);
@@ -107,7 +107,7 @@ function CreateSplashScreen() {
     show: false,
   });
   //splashScreen.webContents.toggleDevTools();
-  splashScreen.loadFile("./screens/splashScreen/splashScreen.html");
+  splashScreen.loadFile("./src/screens/splashScreen/splashScreen.html");
   splashScreen.resizable = false;
   splashScreen.minimizable = false;
   splashScreen.focus();
@@ -119,3 +119,61 @@ function CreateSplashScreen() {
     GetSystemConfiguration();
   });
 }
+
+//create the connect to server screen
+function CreateConnectToServerScreen() {
+  connectToServerScreen = new BrowserWindow({
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+  // connectToServerScreen.webContents.toggleDevTools();
+  connectToServerScreen.loadFile(
+    "./src/screens/connectToServerScreen/connectToServerScreen.html"
+  );
+  connectToServerScreen.maximize();
+
+  Menu.setApplicationMenu(mainMenu);
+}
+
+function CreateNetworkTestScreen() {
+  networkTestScreen = new BrowserWindow({
+    webPreferences: { nodeIntegration: true, contextIsolation: false },
+  });
+  connectToServerScreen.close();
+  connectToServerScreen = null;
+  networkTestScreen.fullScreen = true;
+  networkTestScreen.webContents.toggleDevTools();
+  networkTestScreen.loadFile(
+    "./src/screens/networkTestScreen/networkTest/networkTest.html"
+  );
+}
+
+ipcMain.on("channel1", (e, args) => {
+  e.sender.send("channel2", systemConfiguration);
+});
+
+ipcMain.on("channel3", (e, args) => {
+  serverIpAddress = args;
+});
+
+ipcMain.on("channel4", (e, args) => {
+  console.log(args);
+  testData = args;
+  if (args.mainExamination) {
+    CreateExaminationWindow();
+  } else {
+    CreateNetworkTestScreen();
+  }
+});
+
+ipcMain.on("channel6", (e, args) => {
+  e.sender.send("channel5", { ...testData, serverIpAddress });
+});
+
+app.on("ready", function () {
+  CreateSplashScreen();
+});
+
+process.env.NODE_ENV = "development";
