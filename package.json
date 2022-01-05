@@ -1,0 +1,32 @@
+{
+  "name": "jambdesktopapp",
+  "version": "1.0.0",
+  "description": "Jamb desktop app made from Javascript",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MightyEagle96/jamb-desktop.git"
+  },
+  "author": "The Mighty Eagle",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MightyEagle96/jamb-desktop/issues"
+  },
+  "homepage": "https://github.com/MightyEagle96/jamb-desktop#readme",
+  "devDependencies": {
+    "electron": "^16.0.6",
+    "electron-packager": "^15.4.0"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "bootstrap": "^5.1.3",
+    "font-awesome": "^4.7.0",
+    "fontawesome": "^5.6.3",
+    "ip": "^1.1.5",
+    "sweetalert2": "^11.3.3",
+    "systeminformation": "^5.9.17"
+  }
+}
