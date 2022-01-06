@@ -5,7 +5,14 @@ const si = require("systeminformation");
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain, MenuItem } =
   electron;
 
-let connectToServerScreen, splashScreen, examinationScreen, networkTestScreen;
+const baseFilePath = "./src/screens/";
+
+let connectToServerScreen,
+  splashScreen,
+  examinationScreen,
+  networkTestScreen,
+  candidateLoginScreen,
+  lobbyScreen;
 
 let serverIpAddress, testData;
 
@@ -107,7 +114,7 @@ function CreateSplashScreen() {
     show: false,
   });
   //splashScreen.webContents.toggleDevTools();
-  splashScreen.loadFile("./src/screens/splashScreen/splashScreen.html");
+  splashScreen.loadFile(`${baseFilePath}splashScreen/splashScreen.html`);
   splashScreen.resizable = false;
   splashScreen.minimizable = false;
   splashScreen.focus();
@@ -130,23 +137,51 @@ function CreateConnectToServerScreen() {
   });
   // connectToServerScreen.webContents.toggleDevTools();
   connectToServerScreen.loadFile(
-    "./src/screens/connectToServerScreen/connectToServerScreen.html"
+    `${baseFilePath}connectToServerScreen/connectToServerScreen.html`
   );
   connectToServerScreen.maximize();
 
   Menu.setApplicationMenu(mainMenu);
 }
 
+//create the network test screen
 function CreateNetworkTestScreen() {
   networkTestScreen = new BrowserWindow({
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
-  connectToServerScreen.close();
-  connectToServerScreen = null;
+
   networkTestScreen.fullScreen = true;
+  lobbyScreen.close();
+  lobbyScreen = null;
   networkTestScreen.webContents.toggleDevTools();
   networkTestScreen.loadFile(
-    "./src/screens/networkTestScreen/networkTest/networkTest.html"
+    `${baseFilePath}networkTestScreen/networkTestScreen.html`
+  );
+}
+
+//create the lobby screen
+function CreateLobbyScreen() {
+  lobbyScreen = new BrowserWindow({
+    webPreferences: { nodeIntegration: true, contextIsolation: false },
+  });
+  connectToServerScreen.close();
+  connectToServerScreen = null;
+  lobbyScreen.fullScreen = true;
+  lobbyScreen.webContents.toggleDevTools();
+  lobbyScreen.loadFile(`${baseFilePath}lobbyScreen/lobbyScreen.html`);
+}
+
+//create the candidate login page
+function CreateCandidateLoginScreen() {
+  candidateLoginScreen = new BrowserWindow({
+    webPreferences: { nodeIntegration: true, contextIsolation: false },
+  });
+  lobbyScreen.close();
+  lobbyScreen = null;
+  candidateLoginScreen.fullScreen = true;
+  candidateLoginScreen.webContents.toggleDevTools();
+  candidateLoginScreen.loadFile(
+    `${baseFilePath}candidateLoginScreen/candidateLoginScreen.html`
   );
 }
 
@@ -156,20 +191,20 @@ ipcMain.on("channel1", (e, args) => {
 
 ipcMain.on("channel3", (e, args) => {
   serverIpAddress = args;
+  CreateLobbyScreen();
 });
 
 ipcMain.on("channel4", (e, args) => {
-  console.log(args);
-  testData = args;
-  if (args.mainExamination) {
-    CreateExaminationWindow();
-  } else {
-    CreateNetworkTestScreen();
-  }
+  e.sender.send("channel5", serverIpAddress);
 });
 
 ipcMain.on("channel6", (e, args) => {
-  e.sender.send("channel5", { ...testData, serverIpAddress });
+  CreateCandidateLoginScreen();
+});
+
+ipcMain.on("channel7", (e, args) => {
+  console.log(args);
+  CreateNetworkTestScreen();
 });
 
 app.on("ready", function () {

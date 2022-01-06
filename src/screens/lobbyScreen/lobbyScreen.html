@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="../../../node_modules/bootstrap/dist/css/bootstrap.css"
+    />
+    <link
+      rel="stylesheet"
+      href="../../../node_modules/font-awesome/css/font-awesome.css"
+    />
+    <link rel="stylesheet" href="lobbyScreen.css" />
+    <title>Waiting Area</title>
+  </head>
+  <body>
+    <div class="lobbyScreenBanner"></div>
+    <div class="text-center mt-4">
+      <button class="btn btn-success mb-4 loginPage">
+        Proceed to Exam Login
+      </button>
+      <br />
+      <em style="font-weight: 500"
+        >Remain on this page to conduct a network test.</em
+      >
+    </div>
+    <div class="text-center mt-3">
+      <strong class="connectionStatus"></strong>
+    </div>
+    <script>
+      require("./lobbyScreen");
+    </script>
+  </body>
+</html>

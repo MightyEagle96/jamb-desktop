@@ -4,7 +4,6 @@ const axios = require("axios").default;
 const { port } = require("../../utils/data");
 
 let systemConfiguration;
-let serverIpAddress;
 
 //send message to the server
 ipcRenderer.send("channel1", "Give me something");
@@ -40,67 +39,27 @@ async function TestServer() {
 
       Swal.fire({
         icon: "success",
-        titleText: "COMPUTER CONNECTED",
+        titleText: "Success",
+        text: "Connected to the server",
         showConfirmButton: false,
         timer: 2000,
+      }).then(() => {
+        connectionStatus.classList.add("text-success");
+        connectionStatus.textContent = "CONNECTED";
+
+        document.querySelector(".examinationStatus").style.display = "block";
+
+        //send the serverIp and navigate to the lobby screen
+        ipcRenderer.send("channel3", serverIp);
       });
-      connectionStatus.classList.add("text-success");
-      connectionStatus.textContent = "CONNECTED";
-
-      document.querySelector(".examinationStatus").style.display = "block";
-
-      ipcRenderer.send("channel3", serverIp);
-      IsConnctedToServer();
-      GetExaminationStatus();
     }
   } catch (error) {
     console.log(error);
     Swal.fire({
       icon: "error",
+      title: "Network Error",
       text: "Cannot connect to the server",
     });
     connectionStatus.textContent = "Not Connected";
   }
-}
-
-function GetExaminationStatus() {
-  const timer = setInterval(async () => {
-    try {
-      const path = `http://${serverIpAddress}:${port}/examinationStatus`;
-      const res = await axios.get(path);
-      console.log(res);
-      if (
-        res.data.beginExam.networkTest ||
-        res.data.beginExam.mainExamination
-      ) {
-        console.log(res.data.beginExam);
-        ipcRenderer.send("channel4", res.data.beginExam);
-        clearInterval(timer);
-      }
-    } catch (error) {
-      ChangeConnctionStatusText();
-    }
-  }, 1500);
-}
-
-function IsConnctedToServer() {
-  setInterval(async () => {
-    try {
-      const path = `http://${serverIpAddress}:${port}/serverConnected`;
-      const res = await axios(path);
-      if (res) {
-        connectionStatus.classList.add("text-success");
-        connectionStatus.textContent = "CONNECTED";
-        connectionStatus.classList.remove("text-danger");
-      }
-    } catch (error) {
-      ChangeConnctionStatusText();
-    }
-  }, 2500);
-}
-
-function ChangeConnctionStatusText() {
-  connectionStatus.classList.remove("text-success");
-  connectionStatus.textContent = "DISCONNECTED";
-  connectionStatus.classList.add("text-danger");
 }
