@@ -8,10 +8,12 @@ exports.PerformNetworkTest = (serverIpAddress) => {
     try {
       const path = `http://${serverIpAddress}:${port}/networkTest`;
       const res = await axios.get(path);
-      console.log(res.data.networkTest.isActive);
+
       if (res.data.networkTest.isActive) {
         clearInterval(timer);
-        ipcRenderer.send("channel7", "start network test");
+        ipcRenderer.send("channel7", {
+          duration: res.data.networkTest.duration,
+        });
       }
     } catch (error) {
       // ChangeConnctionStatusText();

@@ -2,7 +2,7 @@ const electron = require("electron");
 const ip = require("ip");
 const si = require("systeminformation");
 
-const { app, BrowserWindow, Menu, globalShortcut, ipcMain, MenuItem } =
+const { app, BrowserWindow, Menu, globalShortcut, ipcMain, powerSaveBlocker } =
   electron;
 
 const baseFilePath = "./src/screens/";
@@ -14,7 +14,7 @@ let connectToServerScreen,
   candidateLoginScreen,
   lobbyScreen;
 
-let serverIpAddress, testData;
+let serverIpAddress, networkTestDuration;
 
 let mainMenu = Menu.buildFromTemplate([]);
 
@@ -167,7 +167,7 @@ function CreateLobbyScreen() {
   connectToServerScreen.close();
   connectToServerScreen = null;
   lobbyScreen.fullScreen = true;
-  lobbyScreen.webContents.toggleDevTools();
+  // lobbyScreen.webContents.toggleDevTools();
   lobbyScreen.loadFile(`${baseFilePath}lobbyScreen/lobbyScreen.html`);
 }
 
@@ -203,12 +203,18 @@ ipcMain.on("channel6", (e, args) => {
 });
 
 ipcMain.on("channel7", (e, args) => {
-  console.log(args);
+  networkTestDuration = args;
   CreateNetworkTestScreen();
 });
 
+ipcMain.on("channel8", (e, args) => {
+  e.sender.send("channel9", networkTestDuration);
+});
+
 app.on("ready", function () {
+  powerSaveBlocker.start("prevent-display-sleep");
   CreateSplashScreen();
 });
 
-process.env.NODE_ENV = "development";
+//process.env.NODE_ENV = "development";
+process.env.NODE_ENV = "production";
