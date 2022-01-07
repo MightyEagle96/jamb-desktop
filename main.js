@@ -156,7 +156,7 @@ function CreateNetworkTestScreen() {
   networkTestScreen.fullScreen = true;
   lobbyScreen.close();
   lobbyScreen = null;
-  networkTestScreen.webContents.toggleDevTools();
+  //networkTestScreen.webContents.toggleDevTools();
   networkTestScreen.loadFile(
     `${baseFilePath}networkTestScreen/networkTestScreen.html`
   );
@@ -219,5 +219,5 @@ app.on("ready", function () {
   CreateSplashScreen();
 });
 
-process.env.NODE_ENV = "development";
-//process.env.NODE_ENV = "production";
+//process.env.NODE_ENV = "development";
+process.env.NODE_ENV = "production";
