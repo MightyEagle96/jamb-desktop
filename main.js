@@ -1,6 +1,7 @@
 const electron = require("electron");
 const ip = require("ip");
 const si = require("systeminformation");
+const macaddress = require("macaddress");
 
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain, powerSaveBlocker } =
   electron;
@@ -9,7 +10,6 @@ const baseFilePath = "./src/screens/";
 
 let connectToServerScreen,
   splashScreen,
-  examinationScreen,
   networkTestScreen,
   candidateLoginScreen,
   lobbyScreen;
@@ -49,9 +49,12 @@ function GetSystemConfiguration() {
     try {
       systemConfiguration.macAddress = data.find(
         (d) => d.iface === "Ethernet"
-      ).mac ||= "-";
+      ).mac;
     } catch (error) {
       systemConfiguration.macAddress = "-";
+      macaddress.one(function (err, mac) {
+        systemConfiguration.macAddress = mac || "-";
+      });
     }
     try {
       systemConfiguration.dhcp =
@@ -76,7 +79,7 @@ function GetSystemConfiguration() {
   });
   //RAM
   si.mem().then((data) => {
-    systemConfiguration.ram = `${Math.floor(data.total / 1000000000)} GB`;
+    systemConfiguration.ram = `${Math.ceil(data.total / 1073741824)} GB`;
   });
   //DISK storage
   si.fsSize().then((data) => {
@@ -153,7 +156,7 @@ function CreateNetworkTestScreen() {
   networkTestScreen.fullScreen = true;
   lobbyScreen.close();
   lobbyScreen = null;
-  networkTestScreen.webContents.toggleDevTools();
+  //networkTestScreen.webContents.toggleDevTools();
   networkTestScreen.loadFile(
     `${baseFilePath}networkTestScreen/networkTestScreen.html`
   );
@@ -179,7 +182,7 @@ function CreateCandidateLoginScreen() {
   lobbyScreen.close();
   lobbyScreen = null;
   candidateLoginScreen.fullScreen = true;
-  candidateLoginScreen.webContents.toggleDevTools();
+  //candidateLoginScreen.webContents.toggleDevTools();
   candidateLoginScreen.loadFile(
     `${baseFilePath}candidateLoginScreen/candidateLoginScreen.html`
   );
@@ -216,5 +219,5 @@ app.on("ready", function () {
   CreateSplashScreen();
 });
 
-//process.env.NODE_ENV = "development";
-process.env.NODE_ENV = "production";
+process.env.NODE_ENV = "development";
+//process.env.NODE_ENV = "production";
