@@ -5,9 +5,16 @@ const ip = require("ip");
 const { port } = require("../../utils/data");
 
 const timeLeftDisplay = document.querySelector(".timeLeft");
+const networkResults = document.querySelector(".networkResults");
+const networkDisplay = document.querySelector(".networkDisplay");
+
+const testDurationDisp = document.querySelector(".testDuration");
+const sentPacketsDisp = document.querySelector(".sentPackets");
+const ackPacketsDisp = document.querySelector(".ackPackets");
 
 let packetsSent = 0;
 let timeLeft = 0;
+let testDuration = 0;
 
 function UpdateTimer(duration) {
   const timeOut = setInterval(() => {
@@ -27,6 +34,7 @@ function UpdateTimer(duration) {
     timeLeftDisplay.textContent = `${hours}:${minutes}:${seconds}`;
     if (duration === 0) {
       clearInterval(timeOut);
+      GetResult();
     }
   }, 1000);
 
@@ -35,6 +43,7 @@ function UpdateTimer(duration) {
 
 ipcRenderer.send("channel8", "Can I have the Ip address");
 ipcRenderer.on("channel9", (e, args) => {
+  testDuration = args.duration;
   let { duration } = args;
 
   duration *= 60 * 1000;
@@ -56,21 +65,34 @@ function SendPacket(timeLeft) {
 
   ipcRenderer.send("channel8", "Network test duration");
   ipcRenderer.on("channel9", (e, args) => {
+    networkDisplay.style.display = "block";
     totalDuration = args.duration;
   });
   const timer = setInterval(() => {
-    axios.post(path, { ipAddress: ip.address() }).then(() => {
-      packetsSent += 1;
-
-      const percentage = Math.ceil((packetsSent / totalDuration) * 100);
-      networkProgess.style.width = `${percentage}%`;
-      networkProgess.textContent = `${percentage}%`;
-    });
-
+    axios
+      .post(path, { ipAddress: ip.address() })
+      .then(() => {
+        const percentage = Math.ceil((packetsSent / totalDuration) * 100);
+        networkProgess.style.width = `${percentage}%`;
+        networkProgess.textContent = `${percentage}%`;
+      })
+      .catch((error) => console.log(error));
+    packetsSent += 1;
     if (timeLeft === 0) {
       clearInterval(timer);
     }
   }, 60 * 1000);
+}
+
+async function GetResult() {
+  networkResults.style.display = "block";
+  const path = `http:${serverIpAddress}:${port}/getMyTestResult`;
+  const res = await axios.post(path, { ipAddress: ip.address() });
+  if (res) {
+    testDurationDisp.textContent = testDuration;
+    sentPacketsDisp.textContent = packetsSent;
+    ackPacketsDisp.textContent = res.data.computer.ackPackets;
+  }
 }
 
 SendPacket(timeLeft);
