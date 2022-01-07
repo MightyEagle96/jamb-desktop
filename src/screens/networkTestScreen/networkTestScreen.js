@@ -15,6 +15,7 @@ const ackPacketsDisp = document.querySelector(".ackPackets");
 let packetsSent = 0;
 let timeLeft = 0;
 let testDuration = 0;
+let serverIpAddress = "";
 
 function UpdateTimer(duration) {
   const timeOut = setInterval(() => {
@@ -50,16 +51,22 @@ ipcRenderer.on("channel9", (e, args) => {
   //console.log(args);
   UpdateTimer(duration);
   setTimeout(() => {
-    Swal.fire({ icon: "info", titleText: "Network Test Complete" });
+    Swal.fire({
+      icon: "info",
+      titleText: "Network Test Complete",
+      showConfirmButton: false,
+      timer: 2000,
+    });
   }, duration);
 });
 
-function SendPacket(timeLeft) {
+function SendPacket() {
   const networkProgess = document.querySelector(".networkProgress");
 
   let path, totalDuration;
   ipcRenderer.send("channel4", "Server ip address");
-  ipcRenderer.on("channel5", (e, serverIpAddress) => {
+  ipcRenderer.on("channel5", (e, args) => {
+    serverIpAddress = args;
     path = `http:${serverIpAddress}:${port}/packetsCount`;
   });
 
@@ -68,30 +75,43 @@ function SendPacket(timeLeft) {
     networkDisplay.style.display = "block";
     totalDuration = args.duration;
   });
-  const timer = setInterval(() => {
-    axios
-      .post(path, { ipAddress: ip.address() })
-      .then(() => {
-        const percentage = Math.ceil((packetsSent / totalDuration) * 100);
-        networkProgess.style.width = `${percentage}%`;
-        networkProgess.textContent = `${percentage}%`;
-      })
-      .catch((error) => console.log(error));
+
+  async function SendThePacket() {
     packetsSent += 1;
+    const res = await axios.post(path, { ipAddress: ip.address() });
+    if (res) {
+      const percentage = Math.ceil((packetsSent / totalDuration) * 100);
+      networkProgess.style.width = `${percentage}%`;
+      networkProgess.textContent = `${percentage}%`;
+    }
+  }
+  const timer = setInterval(() => {
+    SendThePacket();
+
     if (timeLeft === 0) {
       clearInterval(timer);
     }
-  }, 60 * 1000);
+  }, 60000);
 }
 
 async function GetResult() {
+  const testDurationDisp = document.querySelector(".testDuration");
+  const sentPacketsDisp = document.querySelector(".sentPackets");
+  const ackPacketsDisp = document.querySelector(".ackPackets");
+  const testResultDisp = document.querySelector(".testResult");
+
   networkResults.style.display = "block";
   const path = `http:${serverIpAddress}:${port}/getMyTestResult`;
   const res = await axios.post(path, { ipAddress: ip.address() });
   if (res) {
-    testDurationDisp.textContent = testDuration;
+    testDurationDisp.textContent = `${testDuration} ${
+      testDuration > 1 ? "Minutes" : "Minute"
+    }`;
     sentPacketsDisp.textContent = packetsSent;
     ackPacketsDisp.textContent = res.data.computer.ackPackets;
+    testResultDisp.textContent = `${Math.ceil(
+      (Number(res.data.computer.ackPackets) / Number(packetsSent)) * 100
+    )}%`;
   }
 }
 
