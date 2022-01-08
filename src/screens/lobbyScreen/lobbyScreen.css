@@ -1,9 +1,9 @@
 .lobbyScreenBanner {
   height: 80vh;
-  background-image: url("./apple-606761.jpg");
-  /* //background-position: center; */
+  background-image: url("./lobbyBackground.jpg");
+  background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+
   /* background-position-y: -80px; */
 }

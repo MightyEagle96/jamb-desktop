@@ -50,7 +50,7 @@ async function TestServer() {
         document.querySelector(".examinationStatus").style.display = "block";
 
         //send the serverIp and navigate to the lobby screen
-        ipcRenderer.send("channel3", serverIp);
+        ipcRenderer.send("channel3", { serverIp, pageToClose: "" });
       });
     }
   } catch (error) {

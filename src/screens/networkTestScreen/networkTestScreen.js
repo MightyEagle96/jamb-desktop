@@ -3,14 +3,17 @@ const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
 const ip = require("ip");
 const { port } = require("../../utils/data");
+const {
+  IsConnctedToServer,
+  PerformNetworkTest,
+} = require("../../utils/connectionStatus");
 
 const timeLeftDisplay = document.querySelector(".timeLeft");
 const networkResults = document.querySelector(".networkResults");
 const networkDisplay = document.querySelector(".networkDisplay");
+const networkProgess = document.querySelector(".networkProgress");
 
-const testDurationDisp = document.querySelector(".testDuration");
-const sentPacketsDisp = document.querySelector(".sentPackets");
-const ackPacketsDisp = document.querySelector(".ackPackets");
+document.querySelector(".ipAddress").textContent = ip.address();
 
 let packetsSent = 0;
 let timeLeft = 0;
@@ -57,12 +60,16 @@ ipcRenderer.on("channel9", (e, args) => {
       showConfirmButton: false,
       timer: 2000,
     });
+    document.querySelector(".lds-ellipsis").style.display = "none";
+    document.querySelector(".complete").style.display = "block";
   }, duration);
+});
+ipcRenderer.send("channel4", "Lemme have the server ip address");
+ipcRenderer.on("channel5", (e, serverIpAddress) => {
+  IsConnctedToServer(serverIpAddress);
 });
 
 function SendPacket() {
-  const networkProgess = document.querySelector(".networkProgress");
-
   let path, totalDuration;
   ipcRenderer.send("channel4", "Server ip address");
   ipcRenderer.on("channel5", (e, args) => {
@@ -74,17 +81,14 @@ function SendPacket() {
   ipcRenderer.on("channel9", (e, args) => {
     networkDisplay.style.display = "block";
     totalDuration = args.duration;
+    UpdateProgress(totalDuration);
   });
 
   async function SendThePacket() {
-    packetsSent += 1;
-    const res = await axios.post(path, { ipAddress: ip.address() });
-    if (res) {
-      const percentage = Math.ceil((packetsSent / totalDuration) * 100);
-      networkProgess.style.width = `${percentage}%`;
-      networkProgess.textContent = `${percentage}%`;
-    }
+    packetsSent++;
+    await axios.post(path, { ipAddress: ip.address() });
   }
+
   const timer = setInterval(() => {
     SendThePacket();
 
@@ -113,6 +117,36 @@ async function GetResult() {
       (Number(res.data.computer.ackPackets) / Number(packetsSent)) * 100
     )}%`;
   }
+  NavigateToLoginPage();
+}
+function UpdateProgress(totalDuration) {
+  let second = 0;
+
+  const timer = setInterval(() => {
+    second++;
+    const percentage = Math.ceil((second / (totalDuration * 60)) * 100);
+
+    networkProgess.style.width = `${percentage}%`;
+    networkProgess.textContent = `${percentage}%`;
+
+    if (timeLeft === 0) {
+      clearInterval(timer);
+    }
+  }, 1000);
 }
 
 SendPacket(timeLeft);
+
+document.querySelector(".lobbyButton").addEventListener("click", () => {
+  ipcRenderer.send("channel3", { pageToClose: "networkTest" });
+});
+
+document.querySelector(".loginButton").addEventListener("click", () => {
+  ipcRenderer.send("channel6", "networkTest");
+});
+
+function NavigateToLoginPage() {
+  setTimeout(() => {
+    ipcRenderer.send("channel6", "networkTest");
+  }, 3 * 60 * 1000);
+}

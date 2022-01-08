@@ -163,24 +163,34 @@ function CreateNetworkTestScreen() {
 }
 
 //create the lobby screen
-function CreateLobbyScreen() {
+function CreateLobbyScreen(pageToClose) {
   lobbyScreen = new BrowserWindow({
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
-  connectToServerScreen.close();
-  connectToServerScreen = null;
+  if (pageToClose === "networkTest") {
+    networkTestScreen.close();
+    networkTestScreen = null;
+  } else {
+    connectToServerScreen.close();
+    connectToServerScreen = null;
+  }
   lobbyScreen.fullScreen = true;
   // lobbyScreen.webContents.toggleDevTools();
   lobbyScreen.loadFile(`${baseFilePath}lobbyScreen/lobbyScreen.html`);
 }
 
 //create the candidate login page
-function CreateCandidateLoginScreen() {
+function CreateCandidateLoginScreen(pageToClose) {
   candidateLoginScreen = new BrowserWindow({
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
-  lobbyScreen.close();
-  lobbyScreen = null;
+  if (pageToClose === "lobbyScreen") {
+    lobbyScreen.close();
+    lobbyScreen = null;
+  } else if (pageToClose === "networkTest") {
+    networkTestScreen.close();
+    networkTestScreen = null;
+  }
   candidateLoginScreen.fullScreen = true;
   //candidateLoginScreen.webContents.toggleDevTools();
   candidateLoginScreen.loadFile(
@@ -193,8 +203,10 @@ ipcMain.on("channel1", (e, args) => {
 });
 
 ipcMain.on("channel3", (e, args) => {
-  serverIpAddress = args;
-  CreateLobbyScreen();
+  if (args.serverIp) {
+    serverIpAddress = args.serverIp;
+  }
+  CreateLobbyScreen(args.pageToClose);
 });
 
 ipcMain.on("channel4", (e, args) => {
@@ -202,7 +214,8 @@ ipcMain.on("channel4", (e, args) => {
 });
 
 ipcMain.on("channel6", (e, args) => {
-  CreateCandidateLoginScreen();
+  console.log(args);
+  CreateCandidateLoginScreen(args);
 });
 
 ipcMain.on("channel7", (e, args) => {
