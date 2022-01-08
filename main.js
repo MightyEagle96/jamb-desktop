@@ -2,6 +2,7 @@ const electron = require("electron");
 const ip = require("ip");
 const si = require("systeminformation");
 const macaddress = require("macaddress");
+const { default: axios } = require("axios");
 
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain, powerSaveBlocker } =
   electron;
@@ -139,10 +140,10 @@ function CreateConnectToServerScreen() {
     },
   });
   // connectToServerScreen.webContents.toggleDevTools();
+  connectToServerScreen.fullScreen = true;
   connectToServerScreen.loadFile(
     `${baseFilePath}connectToServerScreen/connectToServerScreen.html`
   );
-  connectToServerScreen.maximize();
 
   Menu.setApplicationMenu(mainMenu);
 }
@@ -174,8 +175,15 @@ function CreateLobbyScreen(pageToClose) {
     connectToServerScreen.close();
     connectToServerScreen = null;
   }
+
   lobbyScreen.fullScreen = true;
   // lobbyScreen.webContents.toggleDevTools();
+  lobbyScreen.webContents.on("before-input-event", (event, input) => {
+    if (input.code == "F4" && input.alt) event.preventDefault();
+    if (input.code == "MetaLeft" && input.meta) {
+      lobbyScreen.focus();
+    }
+  });
   lobbyScreen.loadFile(`${baseFilePath}lobbyScreen/lobbyScreen.html`);
 }
 
@@ -230,6 +238,35 @@ ipcMain.on("channel8", (e, args) => {
 app.on("ready", function () {
   powerSaveBlocker.start("prevent-display-sleep");
   CreateSplashScreen();
+});
+
+app.whenReady().then(() => {
+  globalShortcut.register("Control+Shift+Q", () => {
+    app.quit();
+  });
+  // globalShortcut.register("Alt+Tab", function () {
+  //   app.focus();
+  // });
+
+  globalShortcut.register("Super+Tab", () => {
+    app.quit();
+  });
+  globalShortcut.unregister("Win+R");
+});
+
+app.on("before-quit", async (e) => {
+  e.preventDefault();
+
+  const res = await axios.post("http://localhost:5000", { message: "hi" });
+  console.log(res);
+});
+
+app.on("will-quit", (e) => {
+  e.preventDefault();
+  globalShortcut.unregister("Control+Shift+Q");
+
+  // Unregister all shortcuts.
+  globalShortcut.unregisterAll();
 });
 
 //process.env.NODE_ENV = "development";
