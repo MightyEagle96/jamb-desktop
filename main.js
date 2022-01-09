@@ -140,7 +140,7 @@ function CreateConnectToServerScreen() {
       contextIsolation: false,
     },
   });
-  connectToServerScreen.webContents.toggleDevTools();
+  //connectToServerScreen.webContents.toggleDevTools();
   connectToServerScreen.fullScreen = true;
   connectToServerScreen.loadFile(
     `${baseFilePath}connectToServerScreen/connectToServerScreen.html`
