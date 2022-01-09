@@ -1,5 +1,6 @@
 const { default: axios } = require("axios");
 const { ipcRenderer } = require("electron");
+const { default: Swal } = require("sweetalert2");
 const { port } = require("./data");
 
 const connectionStatus = document.querySelector(".connectionStatus");
@@ -42,3 +43,22 @@ function ChangeConnctionStatusText() {
   connectionStatus.textContent = "DISCONNECTED";
   connectionStatus.classList.add("text-danger");
 }
+
+exports.ShutDownApplication = () => {
+  ipcRenderer.on("shutDown", async (e, args) => {
+    console.log(args);
+    const path = `http://${args.serverIpAddress}:${port}/applicationClosed`;
+    const res = await axios.post(path, { ipAddress: args.ipAddress });
+
+    if (res) {
+      console.log(res.data);
+      ipcRenderer.send("appHasClosed", true);
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Error Shutting Down",
+        text: "Please contact administrator",
+      });
+    }
+  });
+};

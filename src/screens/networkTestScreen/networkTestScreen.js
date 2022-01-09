@@ -6,6 +6,7 @@ const { port } = require("../../utils/data");
 const {
   IsConnctedToServer,
   PerformNetworkTest,
+  ShutDownApplication,
 } = require("../../utils/connectionStatus");
 
 const timeLeftDisplay = document.querySelector(".timeLeft");
@@ -150,3 +151,5 @@ function NavigateToLoginPage() {
     ipcRenderer.send("channel6", "networkTest");
   }, 3 * 60 * 1000);
 }
+
+ShutDownApplication();

@@ -3,6 +3,7 @@ const ip = require("ip");
 const si = require("systeminformation");
 const macaddress = require("macaddress");
 const { default: axios } = require("axios");
+const { port } = require("./src/utils/data");
 
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain, powerSaveBlocker } =
   electron;
@@ -177,7 +178,8 @@ function CreateLobbyScreen(pageToClose) {
   }
 
   lobbyScreen.fullScreen = true;
-  // lobbyScreen.webContents.toggleDevTools();
+  //lobbyScreen.webContents.toggleDevTools();
+
   lobbyScreen.webContents.on("before-input-event", (event, input) => {
     if (input.code == "F4" && input.alt) event.preventDefault();
     if (input.code == "MetaLeft" && input.meta) {
@@ -235,6 +237,11 @@ ipcMain.on("channel8", (e, args) => {
   e.sender.send("channel9", networkTestDuration);
 });
 
+ipcMain.on("appHasClosed", (e, args) => {
+  if (args) {
+    return app.quit();
+  }
+});
 app.on("ready", function () {
   powerSaveBlocker.start("prevent-display-sleep");
   CreateSplashScreen();
@@ -254,19 +261,12 @@ app.whenReady().then(() => {
   globalShortcut.unregister("Win+R");
 });
 
-app.on("before-quit", async (e) => {
+app.once("before-quit", (e) => {
   e.preventDefault();
-
-  const res = await axios.post("http://localhost:5000", { message: "hi" });
-  console.log(res);
-});
-
-app.on("will-quit", (e) => {
-  e.preventDefault();
-  globalShortcut.unregister("Control+Shift+Q");
-
-  // Unregister all shortcuts.
-  globalShortcut.unregisterAll();
+  BrowserWindow.getFocusedWindow().webContents.send("shutDown", {
+    serverIpAddress,
+    ipAddress: ip.address(),
+  });
 });
 
 //process.env.NODE_ENV = "development";

@@ -1,5 +1,10 @@
-const macaddress = require("macaddress");
+const seconds = 10;
+let count = 0;
 
-macaddress.one(function (err, mac) {
-  console.log(`Mac Address is ${mac}`);
-});
+const timer = setInterval(() => {
+  count++;
+  console.log("Hello Jesus");
+  if (count === seconds) {
+    clearInterval(timer);
+  }
+}, 1000);
