@@ -28,6 +28,12 @@ const connectionStatus = document.querySelector(".connectionStatus");
 // const networkTestDiv = document.querySelector(".networkTest");
 
 connectBtn.addEventListener("click", TestServer);
+
+window.addEventListener("keydown", function (e) {
+  if (e.code === "Enter") {
+    TestServer();
+  }
+});
 async function TestServer() {
   const serverIp = document.getElementById("serverIp").value;
 
