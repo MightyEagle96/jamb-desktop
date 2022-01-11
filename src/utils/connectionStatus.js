@@ -19,7 +19,7 @@ exports.PerformNetworkTest = (serverIpAddress) => {
     } catch (error) {
       // ChangeConnctionStatusText();
     }
-  }, 1500);
+  }, 1200);
 };
 
 exports.IsConnctedToServer = (serverIpAddress) => {
@@ -35,7 +35,7 @@ exports.IsConnctedToServer = (serverIpAddress) => {
     } catch (error) {
       ChangeConnctionStatusText();
     }
-  }, 2500);
+  }, 1500);
 };
 
 function ChangeConnctionStatusText() {
@@ -61,4 +61,14 @@ exports.ShutDownApplication = () => {
       });
     }
   });
+};
+
+exports.GetCenterDetails = async (serverIpAddress) => {
+  const path = `http://${serverIpAddress}:${port}/centerDetails`;
+  const res = await axios.get(path);
+
+  if (res && res.data.centerDetails) {
+    document.querySelector(".centerName").textContent =
+      "Center Name: " + res.data.centerDetails.centerName;
+  }
 };

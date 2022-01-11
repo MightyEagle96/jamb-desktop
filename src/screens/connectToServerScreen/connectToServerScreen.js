@@ -40,6 +40,7 @@ async function TestServer() {
   try {
     const path = `http://${serverIp}:${port}/test`;
     const res = await axios.post(path, systemConfiguration);
+    console.log(res.data);
     if (res) {
       serverIpAddress = serverIp;
 
@@ -60,12 +61,19 @@ async function TestServer() {
       });
     }
   } catch (error) {
-    console.log(error);
-    Swal.fire({
-      icon: "error",
-      title: "Network Error",
-      text: "Cannot connect to the server",
-    });
-    connectionStatus.textContent = "Not Connected";
+    if (error && error.response) {
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: error.response.data.message,
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Network Error",
+        text: "Cannot connect to the server. Confirm the Ip Address, entered and try again.",
+      });
+      connectionStatus.textContent = "Not Connected";
+    }
   }
 }
