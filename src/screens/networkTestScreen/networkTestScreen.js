@@ -5,7 +5,7 @@ const ip = require("ip");
 const { port } = require("../../utils/data");
 const {
   IsConnctedToServer,
-  PerformNetworkTest,
+
   ShutDownApplication,
 } = require("../../utils/connectionStatus");
 
@@ -86,7 +86,7 @@ function SendPacket() {
   });
 
   async function SendThePacket() {
-    packetsSent++;
+    if (packetsSent <= testDuration) packetsSent++;
     await axios.post(path, { ipAddress: ip.address() });
   }
 

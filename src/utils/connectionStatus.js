@@ -27,11 +27,14 @@ exports.IsConnctedToServer = (serverIpAddress) => {
     try {
       const path = `http://${serverIpAddress}:${port}/serverConnected`;
       const res = await axios(path);
-      if (res) {
+      if (res && res.data.connected && !res.data.shutDown) {
         connectionStatus.classList.add("text-success");
         connectionStatus.textContent = "CONNECTED";
         connectionStatus.classList.remove("text-danger");
+      } else {
+        ipcRenderer.send("shutDownApp", "Oya shut down");
       }
+      //else if(res && res.data)
     } catch (error) {
       ChangeConnctionStatusText();
     }

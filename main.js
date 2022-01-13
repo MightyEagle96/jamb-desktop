@@ -242,6 +242,10 @@ ipcMain.on("appHasClosed", (e, args) => {
     return app.quit();
   }
 });
+
+ipcMain.on("shutDownApp", (e, args) => {
+  app.quit();
+});
 app.on("ready", function () {
   powerSaveBlocker.start("prevent-display-sleep");
   CreateSplashScreen();
@@ -251,9 +255,6 @@ app.whenReady().then(() => {
   globalShortcut.register("Control+Shift+Q", () => {
     app.quit();
   });
-  // globalShortcut.register("Alt+Tab", function () {
-  //   app.focus();
-  // });
 
   globalShortcut.register("Super+Tab", () => {
     app.quit();
@@ -263,10 +264,15 @@ app.whenReady().then(() => {
 
 app.once("before-quit", (e) => {
   e.preventDefault();
-  BrowserWindow.getFocusedWindow().webContents.send("shutDown", {
-    serverIpAddress,
-    ipAddress: ip.address(),
-  });
+
+  try {
+    BrowserWindow.getFocusedWindow().webContents.send("shutDown", {
+      serverIpAddress,
+      ipAddress: ip.address(),
+    });
+  } catch (error) {
+    app.quit();
+  }
 });
 
 //process.env.NODE_ENV = "development";
