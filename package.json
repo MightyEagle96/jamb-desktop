@@ -6,7 +6,25 @@
   "scripts": {
     "start": "electron .",
     "watch": "nodemon --exec electron .",
+    "build": "electron-builder",
     "package-win": "electron-packager . jambdesktopapp  --overwrite --asar=true --platform=win32 --arch=ia32 --icon=src/assets/jambIcon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"JambCBT\""
+  },
+  "build": {
+    "appId": "jamb-desktop",
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "jambIcon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "installerIcon": "jambIcon.ico",
+      "uninstallerIcon": "jambIcon.ico",
+      "uninstallDisplayName": "jamb-desktop-uninstaller",
+      "license": "license.md",
+      "allowToChangeInstallationDirectory": false
+    }
   },
   "repository": {
     "type": "git",
@@ -20,7 +38,9 @@
   "homepage": "https://github.com/MightyEagle96/jamb-desktop#readme",
   "devDependencies": {
     "electron": "^16.0.6",
-    "electron-packager": "^15.4.0"
+    "electron-builder": "^22.14.5",
+    "electron-packager": "^15.4.0",
+    "electron-wix-msi": "^3.2.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
