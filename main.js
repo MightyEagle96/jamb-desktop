@@ -158,7 +158,7 @@ function CreateNetworkTestScreen() {
   networkTestScreen.fullScreen = true;
   lobbyScreen.close();
   lobbyScreen = null;
-  networkTestScreen.webContents.toggleDevTools();
+  // networkTestScreen.webContents.toggleDevTools();
   networkTestScreen.loadFile(
     `${baseFilePath}networkTestScreen/networkTestScreen.html`
   );

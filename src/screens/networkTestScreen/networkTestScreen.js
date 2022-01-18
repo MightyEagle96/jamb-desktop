@@ -114,8 +114,12 @@ async function GetResult() {
     testDurationDisp.textContent = `${testDuration} ${
       testDuration > 1 ? "Minutes" : "Minute"
     }`;
-    sentPacketsDisp.textContent = packetsSent;
-    ackPacketsDisp.textContent = res.data.computer.ackPackets;
+    sentPacketsDisp.textContent = `${Math.floor(
+      (packetsSent / testDuration) * 180
+    )}`;
+    ackPacketsDisp.textContent = `${Math.floor(
+      (res.data.computer.ackPackets / testDuration) * 180
+    )}`;
     testResultDisp.textContent = `${Math.ceil(
       (Number(res.data.computer.ackPackets) / Number(packetsSent)) * 100
     )}%`;
