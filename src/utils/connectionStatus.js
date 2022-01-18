@@ -1,5 +1,5 @@
 const { default: axios } = require("axios");
-const { ipcRenderer } = require("electron");
+const { ipcRenderer, BrowserWindow } = require("electron");
 const { default: Swal } = require("sweetalert2");
 const { port } = require("./data");
 
@@ -17,13 +17,13 @@ exports.PerformNetworkTest = (serverIpAddress) => {
         });
       }
     } catch (error) {
-      // ChangeConnctionStatusText();
+      ChangeConnctionStatusText();
     }
   }, 1200);
 };
 
 exports.IsConnctedToServer = (serverIpAddress) => {
-  setInterval(async () => {
+  const serverConnection = setInterval(async () => {
     try {
       const path = `http://${serverIpAddress}:${port}/serverConnected`;
       const res = await axios(path);
@@ -36,6 +36,10 @@ exports.IsConnctedToServer = (serverIpAddress) => {
       }
       //else if(res && res.data)
     } catch (error) {
+      if (error && error.response.data.message) {
+        ipcRenderer.send("connectToServer", true);
+        clearInterval(serverConnection);
+      }
       ChangeConnctionStatusText();
     }
   }, 1500);

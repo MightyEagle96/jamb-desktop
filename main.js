@@ -158,7 +158,7 @@ function CreateNetworkTestScreen() {
   networkTestScreen.fullScreen = true;
   lobbyScreen.close();
   lobbyScreen = null;
-  //networkTestScreen.webContents.toggleDevTools();
+  networkTestScreen.webContents.toggleDevTools();
   networkTestScreen.loadFile(
     `${baseFilePath}networkTestScreen/networkTestScreen.html`
   );
@@ -249,6 +249,24 @@ ipcMain.on("shutDownApp", (e, args) => {
 app.on("ready", function () {
   powerSaveBlocker.start("prevent-display-sleep");
   CreateSplashScreen();
+});
+
+ipcMain.on("connectToServer", (e, args) => {
+  if (args) {
+    if (networkTestScreen) {
+      networkTestScreen.close();
+      networkTestScreen = null;
+    }
+    if (candidateLoginScreen) {
+      candidateLoginScreen.close();
+      candidateLoginScreen = null;
+    }
+    if (lobbyScreen) {
+      lobbyScreen.close();
+      lobbyScreen = null;
+    }
+    CreateConnectToServerScreen();
+  }
 });
 
 app.whenReady().then(() => {

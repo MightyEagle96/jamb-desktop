@@ -38,7 +38,7 @@ async function TestServer() {
   const serverIp = document.getElementById("serverIp").value;
 
   try {
-    const path = `http://${serverIp}:${port}/test`;
+    const path = `http://${serverIp}:${port}/connectToServer`;
     const res = await axios.post(path, systemConfiguration);
     console.log(res.data);
     if (res) {

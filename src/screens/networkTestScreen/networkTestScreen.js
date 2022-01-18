@@ -41,6 +41,7 @@ function UpdateTimer(duration) {
       clearInterval(timeOut);
       GetResult();
     }
+    console.log("still running");
   }, 1000);
 
   //SendPacket(duration);
@@ -57,7 +58,7 @@ ipcRenderer.on("channel9", (e, args) => {
   setTimeout(() => {
     Swal.fire({
       icon: "info",
-      titleText: "Network Test Complete",
+      titleText: "Examination Complete",
       showConfirmButton: false,
       timer: 2000,
     });
@@ -91,10 +92,11 @@ function SendPacket() {
   }
 
   const timer = setInterval(() => {
-    SendThePacket();
-
     if (timeLeft === 0) {
       clearInterval(timer);
+    } else {
+      SendThePacket();
+      console.log("running");
     }
   }, 60000);
 }
