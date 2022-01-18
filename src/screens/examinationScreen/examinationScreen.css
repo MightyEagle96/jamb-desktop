@@ -1,0 +1,18 @@
+body {
+  overflow-x: hidden;
+}
+.detailsCol {
+  height: 100vh;
+  background-image: linear-gradient(
+      to right bottom,
+      rgba(11, 63, 18, 0.856),
+      rgba(0, 128, 0, 0.61)
+    ),
+    url("./statusImage.png");
+  background-position: center;
+}
+.avatar {
+  border-radius: 50%;
+  height: 120px;
+  width: 130px;
+}
