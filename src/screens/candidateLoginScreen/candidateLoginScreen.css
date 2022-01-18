@@ -1,0 +1,22 @@
+.candidateBanner {
+  height: 100vh;
+  background-image: linear-gradient(
+      to right bottom,
+      rgba(0, 0, 0, 0.384),
+      rgba(0, 0, 0, 0.445)
+    ),
+    url("./candidateLoginBanner.jpg");
+}
+
+.candidateLoginScreen {
+  background-image: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 0.89),
+    rgba(255, 255, 255, 0.87)
+  );
+}
+
+.jambLogo {
+  height: 120px;
+  width: 130px;
+}
