@@ -36,12 +36,14 @@ exports.IsConnctedToServer = (serverIpAddress) => {
       }
       //else if(res && res.data)
     } catch (error) {
+      ChangeConnctionStatusText();
       if (error && error.response.data.message) {
         ipcRenderer.send("connectToServer", true);
         clearInterval(serverConnection);
-      } else {
-        ChangeConnctionStatusText();
       }
+      // } else {
+      //   ChangeConnctionStatusText();
+      // }
     }
   }, 1500);
 };
