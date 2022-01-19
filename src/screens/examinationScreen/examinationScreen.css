@@ -12,7 +12,13 @@ body {
   background-position: center;
 }
 .avatar {
+  border: 4px solid rgb(134, 230, 104);
   border-radius: 50%;
-  height: 120px;
+  height: 130px;
   width: 130px;
+}
+
+.examDetails {
+  height: max-content;
+  background-color: white;
 }
