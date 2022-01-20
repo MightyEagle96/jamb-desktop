@@ -41,10 +41,7 @@ function UpdateTimer(duration) {
       clearInterval(timeOut);
       GetResult();
     }
-    console.log("still running");
   }, 1000);
-
-  //SendPacket(duration);
 }
 
 ipcRenderer.send("channel8", "Can I have the Ip address");
@@ -53,7 +50,7 @@ ipcRenderer.on("channel9", (e, args) => {
   let { duration } = args;
 
   duration *= 60 * 1000;
-  //console.log(args);
+
   UpdateTimer(duration);
   setTimeout(() => {
     Swal.fire({
@@ -96,7 +93,6 @@ function SendPacket() {
       clearInterval(timer);
     } else {
       SendThePacket();
-      console.log("running");
     }
   }, 60000);
 }

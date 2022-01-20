@@ -1,14 +1,36 @@
+let timer = 120 * 60 * 1000;
+
+const timeLeftDisplay = document.querySelector(".timeLeft");
+
+function UpdateTimer(duration) {
+  const timeOut = setInterval(() => {
+    duration -= 1000;
+
+    timeLeft = duration;
+
+    let hrlLabel = Math.floor(duration / (60 * 60 * 1000));
+
+    let minLabel = Math.floor((duration / (60 * 1000)) % 60);
+
+    let secLabel = (duration % (60 * 1000)) / 1000;
+
+    const hours = hrlLabel > 9 ? hrlLabel : `0${hrlLabel}`;
+    const minutes = minLabel > 9 ? minLabel : `0${minLabel}`;
+    const seconds = secLabel > 9 ? secLabel : `0${secLabel}`;
+
+    timeLeftDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+    if (duration === 0) {
+      clearInterval(timeOut);
+    }
+  }, 1000);
+}
+
+UpdateTimer(timer);
 //1. set the subject title
 const btns = document.getElementsByClassName("subjectBtn");
 
 //to load it by default
 document.getElementById("subjectTitle").textContent = btns[0].textContent;
-// const buttons = [];
-
-// for (let i = 0; i < 60; i++) {
-//   buttons.push(`<button class="btn btn-warning me-2 mb-2">${i + 1}</button>`);
-// }
-// document.querySelector(".answerBtn").innerHTML = buttons.join(" ");
 
 //==================
 
@@ -68,13 +90,6 @@ const questions = [
   },
 ];
 
-//to create the btns below
-
-// //change color of button
-// function ChangeNumber(e) {
-//     document.querySelector('.questionNumber').textContent
-// }
-
 const useOfEnglishQuestions = [];
 
 for (let i = 0; i < 60; i++) {
@@ -106,28 +121,6 @@ function CreateButtons(subjectTitle) {
 
     answerBtn.appendChild(newContent);
   }
-
-  //   if (subjectTitle === "USE OF ENGLISH") {
-  //     const buttons = [];
-
-  //     for (let i = 0; i < 60; i++) {
-  //       buttons.push(
-  //         `<button class="btn btn-warning useOfEnglishBtn me-2 mb-2">${
-  //           i + 1
-  //         }</button>`
-  //       );
-  //     }
-  //     document.querySelector(".answerBtn").innerHTML = buttons.join(" ");
-  //   } else {
-  //     const buttons = [];
-
-  //     for (let i = 0; i < 40; i++) {
-  //       buttons.push(
-  //         `<button class="btn btn-warning me-2 mb-2"}=>${i + 1}</button>`
-  //       );
-  //     }
-  //     document.querySelector(".answerBtn").innerHTML = buttons.join(" ");
-  //  }
 }
 
 CreateButtons();
