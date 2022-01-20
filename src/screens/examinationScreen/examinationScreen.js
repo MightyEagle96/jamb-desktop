@@ -124,3 +124,13 @@ function CreateButtons(subjectTitle) {
 }
 
 CreateButtons();
+
+function showCalculator() {
+  document.querySelector(".calculatorContainer").style.display = "block";
+  document.querySelector(".candidateDetails").style.display = "none";
+}
+
+function hideCalculator() {
+  document.querySelector(".calculatorContainer").style.display = "none";
+  document.querySelector(".candidateDetails").style.display = "block";
+}
