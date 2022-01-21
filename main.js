@@ -4,6 +4,7 @@ const si = require("systeminformation");
 const macaddress = require("macaddress");
 const { default: axios } = require("axios");
 const { port } = require("./src/utils/data");
+const fa = require("fontawesome");
 
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain, powerSaveBlocker } =
   electron;
@@ -14,7 +15,8 @@ let connectToServerScreen,
   splashScreen,
   networkTestScreen,
   candidateLoginScreen,
-  lobbyScreen;
+  lobbyScreen,
+  examinationScreen;
 
 let serverIpAddress, networkTestDuration;
 
@@ -194,6 +196,7 @@ function CreateCandidateLoginScreen(pageToClose) {
   candidateLoginScreen = new BrowserWindow({
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
+  //candidateLoginScreen.webContents.toggleDevTools();
   if (pageToClose === "lobbyScreen") {
     lobbyScreen.close();
     lobbyScreen = null;
@@ -205,6 +208,17 @@ function CreateCandidateLoginScreen(pageToClose) {
   //candidateLoginScreen.webContents.toggleDevTools();
   candidateLoginScreen.loadFile(
     `${baseFilePath}candidateLoginScreen/candidateLoginScreen.html`
+  );
+}
+
+//create the examination
+function CreateExaminationScreen() {
+  examinationScreen = new BrowserWindow({
+    webPreferences: { nodeIntegration: true, contextIsolation: false },
+  });
+  examinationScreen.fullScreen = true;
+  examinationScreen.loadFile(
+    `${baseFilePath}examinationScreen/examinationScreen.html`
   );
 }
 
@@ -224,7 +238,6 @@ ipcMain.on("channel4", (e, args) => {
 });
 
 ipcMain.on("channel6", (e, args) => {
-  console.log(args);
   CreateCandidateLoginScreen(args);
 });
 
@@ -267,6 +280,22 @@ ipcMain.on("connectToServer", (e, args) => {
     }
     CreateConnectToServerScreen();
   }
+});
+
+ipcMain.on("login", (e, args) => {
+  if (networkTestScreen) {
+    networkTestScreen.close();
+    networkTestScreen = null;
+  }
+  if (candidateLoginScreen) {
+    candidateLoginScreen.close();
+    candidateLoginScreen = null;
+  }
+  if (lobbyScreen) {
+    lobbyScreen.close();
+    lobbyScreen = null;
+  }
+  CreateExaminationScreen();
 });
 
 app.whenReady().then(() => {

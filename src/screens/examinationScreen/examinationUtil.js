@@ -9,9 +9,4 @@ ipcRenderer.on("channel5", (e, serverIpAddress) => {
   IsConnctedToServer(serverIpAddress);
 });
 
-document.querySelector(".login").addEventListener("click", login);
-
-function login() {
-  ipcRenderer.send("login", "proceedToLogin");
-}
 ShutDownApplication();
