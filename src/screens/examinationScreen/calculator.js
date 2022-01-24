@@ -82,3 +82,14 @@ function MyFunc(operator, operand1, operand2) {
       break;
   }
 }
+
+//show caluclator
+function showCalculator() {
+  document.querySelector(".calculatorContainer").style.display = "block";
+  document.querySelector(".candidateDetails").style.display = "none";
+}
+//hide calculator
+function hideCalculator() {
+  document.querySelector(".calculatorContainer").style.display = "none";
+  document.querySelector(".candidateDetails").style.display = "block";
+}

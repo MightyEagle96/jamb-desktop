@@ -2,9 +2,8 @@ const electron = require("electron");
 const ip = require("ip");
 const si = require("systeminformation");
 const macaddress = require("macaddress");
-const { default: axios } = require("axios");
-const { port } = require("./src/utils/data");
-const fa = require("fontawesome");
+const { GetQuestions } = require("./src/utils/data");
+//const { GetQuestions } = require("./src/utils/connectionStatus");
 
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain, powerSaveBlocker } =
   electron;
@@ -19,6 +18,8 @@ let connectToServerScreen,
   examinationScreen;
 
 let serverIpAddress, networkTestDuration;
+
+let examinationQuestions = [];
 
 let mainMenu = Menu.buildFromTemplate([]);
 
@@ -211,11 +212,12 @@ function CreateCandidateLoginScreen(pageToClose) {
   );
 }
 
-//create the examination
+//create the examination screen
 function CreateExaminationScreen() {
   examinationScreen = new BrowserWindow({
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
+  examinationScreen.webContents.toggleDevTools();
   examinationScreen.fullScreen = true;
   examinationScreen.loadFile(
     `${baseFilePath}examinationScreen/examinationScreen.html`
@@ -258,6 +260,17 @@ ipcMain.on("appHasClosed", (e, args) => {
 
 ipcMain.on("shutDownApp", (e, args) => {
   app.quit();
+});
+
+ipcMain.on("getQuestions", (e, args) => {
+  if (serverIpAddress !== "") {
+    GetQuestions(serverIpAddress).then((data) => {
+      examinationQuestions = data;
+      if (examinationQuestions.length > 0) {
+        e.sender.send("sendQuestions", examinationQuestions);
+      }
+    });
+  }
 });
 app.on("ready", function () {
   powerSaveBlocker.start("prevent-display-sleep");

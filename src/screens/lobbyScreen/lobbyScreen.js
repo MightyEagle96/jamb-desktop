@@ -5,7 +5,6 @@ const {
   ShutDownApplication,
   GetCenterDetails,
 } = require("../../utils/connectionStatus");
-const { port } = require("../../utils/data");
 
 document.querySelector(".loginPage").addEventListener("click", function () {
   ipcRenderer.send("channel6", "lobbyScreen");
