@@ -217,7 +217,7 @@ function CreateExaminationScreen() {
   examinationScreen = new BrowserWindow({
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
-  examinationScreen.webContents.toggleDevTools();
+  //examinationScreen.webContents.toggleDevTools();
   examinationScreen.fullScreen = true;
   examinationScreen.loadFile(
     `${baseFilePath}examinationScreen/examinationScreen.html`
