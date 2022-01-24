@@ -1,5 +1,7 @@
 const { ipcRenderer } = require("electron");
 
+let candidateAnswers = [];
+
 ipcRenderer.send("getQuestions", "Lemme have the server ip address");
 ipcRenderer.on("sendQuestions", (e, questions) => {
   const subjectButtons = questions;
@@ -56,9 +58,10 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
   function CreateNumberButtons(subject) {
     const buttonDiv = document.createElement("div");
     if (subject.slug === "use-of-english") {
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < subject.questions.length; i++) {
         const newContent = document.createElement("button");
-        newContent.classList = "btn btn-warning me-2 mb-2";
+        newContent.classList = `btn btn-warning me-2 mb-2 ${subject.slug}-${subject.questions[i]._id}`;
+
         newContent.textContent = i + 1;
         newContent.addEventListener("click", function () {
           //to change the number
@@ -81,9 +84,9 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
         buttonDiv.appendChild(newContent);
       }
     } else {
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < subject.questions.length; i++) {
         const newContent = document.createElement("button");
-        newContent.classList = "btn btn-warning me-2 mb-2";
+        newContent.classList = `btn btn-warning me-2 mb-2 ${subject.slug}-${subject.questions[i]._id}`;
         newContent.textContent = i + 1;
         newContent.addEventListener("click", function () {
           //to change the number
@@ -167,8 +170,16 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionA.type = "radio";
       optionA.className = "form-check-input";
       optionA.value = questions[i].optionA;
-      optionA.setAttribute("name", questions[i]._id);
+      optionA.setAttribute("name", `${subject.slug}-${questions[i]._id}`);
       optionA.setAttribute("id", `${questions[i]._id}-${questions[i].optionA}`);
+      optionA.addEventListener("click", function () {
+        MarkQuestion(
+          subject.slug,
+          `${subject.slug}-${questions[i]._id}`,
+          questions[i].optionA,
+          questions[i].correctAnswer
+        );
+      });
 
       divA.append(optionA);
       const labelOptionA = document.createElement("label");
@@ -190,6 +201,14 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionB.value = questions[i].optionB;
       optionB.setAttribute("name", questions[i]._id);
       optionB.setAttribute("id", `${questions[i]._id}-${questions[i].optionB}`);
+      optionB.addEventListener("click", function () {
+        MarkQuestion(
+          subject.slug,
+          `${subject.slug}-${questions[i]._id}`,
+          questions[i].optionB,
+          questions[i].correctAnswer
+        );
+      });
 
       divB.append(optionB);
       const labeloptionB = document.createElement("label");
@@ -211,6 +230,14 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionC.value = questions[i].optionC;
       optionC.setAttribute("name", questions[i]._id);
       optionC.setAttribute("id", `${questions[i]._id}-${questions[i].optionC}`);
+      optionC.addEventListener("click", function () {
+        MarkQuestion(
+          subject.slug,
+          `${subject.slug}-${questions[i]._id}`,
+          questions[i].optionC,
+          questions[i].correctAnswer
+        );
+      });
 
       divC.append(optionC);
       const labeloptionC = document.createElement("label");
@@ -232,6 +259,14 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionD.setAttribute("name", questions[i]._id);
       optionD.value = questions[i].optionD;
       optionD.setAttribute("id", `${questions[i]._id}-${questions[i].optionD}`);
+      optionD.addEventListener("click", function () {
+        MarkQuestion(
+          subject.slug,
+          `${subject.slug}-${questions[i]._id}`,
+          questions[i].optionD,
+          questions[i].correctAnswer
+        );
+      });
 
       divD.append(optionD);
       const labeloptionD = document.createElement("label");
@@ -242,6 +277,12 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       );
       labeloptionD.textContent = `D. ${questions[i].optionD}`;
       divD.append(labeloptionD);
+
+      //==========
+
+      const correctAnswer = document.createElement("input");
+      correctAnswer.type = "hidden";
+      correctAnswer.value = questions[i].correctAnswer;
 
       //===========================
       optionsDiv.classList = "mt-5 mb-3";
@@ -278,4 +319,28 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     }
   }
   InitializeQuestions();
+
+  function MarkQuestion(subject, questionId, candidateAnswer, correctAnswer) {
+    const score = candidateAnswer === correctAnswer ? 1 : 0;
+    const data = { subject, questionId, candidateAnswer, correctAnswer, score };
+
+    const index = candidateAnswers.findIndex(
+      (cand) => cand.questionId === questionId
+    );
+
+    if (index < 0) {
+      candidateAnswers.push(data);
+    } else {
+      candidateAnswers[index] = data;
+    }
+
+    console.log(candidateAnswers);
+    //update the candidate's question answered counter
+    document.querySelector(".answerCounter").textContent =
+      candidateAnswers.length;
+
+    //change colour of button
+    document.querySelector(`.${questionId}`).classList.remove("btn-warning");
+    document.querySelector(`.${questionId}`).classList.add("btn-success");
+  }
 });
