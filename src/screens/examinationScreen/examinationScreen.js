@@ -252,6 +252,8 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionsDiv.append(divD);
 
       questionTextDiv.textContent = questions[i].question;
+      questionTextDiv.classList = "questionText";
+
       newQuestionDiv.classList = `${subject.slug}-question${i} p-3`;
       newQuestionDiv.append(questionTextDiv);
       newQuestionDiv.append(optionsDiv);
