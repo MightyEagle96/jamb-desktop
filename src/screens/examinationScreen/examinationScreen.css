@@ -2,8 +2,8 @@ body {
   overflow-x: hidden;
 }
 .detailsCol {
-  height: max-content;
-
+  height: 100vh;
+  /* position: fixed; */
   background-image: linear-gradient(
       to right bottom,
       rgba(11, 63, 18, 0.856),
@@ -25,8 +25,8 @@ body {
 }
 
 .calculatorContainer {
-  display: none;
-  height: 400px;
+  /* display: none; */
+  height: max-content;
   background-color: white;
 }
 .calculatorScreen {
