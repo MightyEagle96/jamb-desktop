@@ -199,7 +199,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionB.type = "radio";
       optionB.className = "form-check-input";
       optionB.value = questions[i].optionB;
-      optionB.setAttribute("name", questions[i]._id);
+      optionB.setAttribute("name", `${subject.slug}-${questions[i]._id}`);
       optionB.setAttribute("id", `${questions[i]._id}-${questions[i].optionB}`);
       optionB.addEventListener("click", function () {
         MarkQuestion(
@@ -228,7 +228,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionC.type = "radio";
       optionC.className = "form-check-input";
       optionC.value = questions[i].optionC;
-      optionC.setAttribute("name", questions[i]._id);
+      optionC.setAttribute("name", `${subject.slug}-${questions[i]._id}`);
       optionC.setAttribute("id", `${questions[i]._id}-${questions[i].optionC}`);
       optionC.addEventListener("click", function () {
         MarkQuestion(
@@ -256,7 +256,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       const optionD = document.createElement("input");
       optionD.type = "radio";
       optionD.className = "form-check-input";
-      optionD.setAttribute("name", questions[i]._id);
+      optionD.setAttribute("name", `${subject.slug}-${questions[i]._id}`);
       optionD.value = questions[i].optionD;
       optionD.setAttribute("id", `${questions[i]._id}-${questions[i].optionD}`);
       optionD.addEventListener("click", function () {

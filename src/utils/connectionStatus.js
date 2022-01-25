@@ -5,21 +5,20 @@ const { port } = require("./data");
 
 const connectionStatus = document.querySelector(".connectionStatus");
 exports.PerformNetworkTest = (serverIpAddress) => {
-  const timer = setInterval(async () => {
-    try {
-      const path = `http://${serverIpAddress}:${port}/networkTest`;
-      const res = await axios.get(path);
-
-      if (res.data.networkTest.isActive) {
-        clearInterval(timer);
-        ipcRenderer.send("channel7", {
-          duration: res.data.networkTest.duration,
-        });
-      }
-    } catch (error) {
-      ChangeConnctionStatusText();
-    }
-  }, 1200);
+  // const timer = setInterval(async () => {
+  //   try {
+  //     const path = `http://${serverIpAddress}:${port}/networkTest`;
+  //     const res = await axios.get(path);
+  //     if (res.data.networkTest.isActive) {
+  //       clearInterval(timer);
+  //       ipcRenderer.send("channel7", {
+  //         duration: res.data.networkTest.duration,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     ChangeConnctionStatusText();
+  //   }
+  // }, 1200);
 };
 
 exports.IsConnctedToServer = (serverIpAddress) => {
@@ -36,14 +35,26 @@ exports.IsConnctedToServer = (serverIpAddress) => {
       }
       //else if(res && res.data)
     } catch (error) {
+      console.error({ error });
+      console.log(error.message);
       ChangeConnctionStatusText();
-      if (error && error.response.data.message) {
+      if (error && error.message && !error.response) {
+        clearInterval(serverConnection);
+        Swal.fire({
+          icon: "warning",
+          titleText: "Network Connection Lost",
+          confirmButtonText: "Retry connection",
+        }).then(() => {
+          ipcRenderer.send("channel4", "Please let me have the IP address");
+          ipcRenderer.on("channel5", (e, args) => {
+            this.IsConnctedToServer(args);
+            console.log(args);
+          });
+        });
+      } else if (error && error.response.data.message) {
         ipcRenderer.send("connectToServer", true);
         clearInterval(serverConnection);
       }
-      // } else {
-      //   ChangeConnctionStatusText();
-      // }
     }
   }, 1500);
 };
