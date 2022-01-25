@@ -25,7 +25,7 @@ body {
 }
 
 .calculatorContainer {
-  /* display: none; */
+  display: none;
   height: max-content;
   background-color: white;
 }

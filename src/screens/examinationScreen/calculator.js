@@ -15,7 +15,6 @@ document.getElementById("backSpace").addEventListener("click", function () {
 
     screenText = [];
     screenText.push(reducedText);
-    console.log(screenText);
 
     document.querySelector(".calculatorScreen").value = screenText.join("");
   }
@@ -79,7 +78,6 @@ function displayNum(num) {
           screenText[1] = num;
         } else {
           screenText.push(num);
-          console.log({ screenText });
         }
       }
     }
@@ -99,7 +97,6 @@ function performOperation(num) {
     screenText = [];
     screenText.push(result.toString());
   } else {
-    console.log("something else");
   }
 }
 
