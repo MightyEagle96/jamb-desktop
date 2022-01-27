@@ -1,12 +1,25 @@
 const { ipcRenderer } = require("electron");
+const { default: Swal } = require("sweetalert2");
 
 let candidateAnswers = [];
+
+ipcRenderer.send("fetchCandidate", "lemme have the candidate");
+
+ipcRenderer.on("candidate", (e, candidate) => {
+  console.log({ candidate });
+  document.querySelector(".firstName").textContent = candidate.firstName;
+  document.querySelector(".lastName").textContent = candidate.lastName;
+  document.querySelector(".registrationNumber").textContent =
+    candidate.registrationNumber.toUpperCase();
+
+  document.querySelector(".seatNumber").textContent = candidate.seatNumber;
+});
 
 ipcRenderer.send("getQuestions", "Lemme have the questions");
 ipcRenderer.on("sendQuestions", (e, questions) => {
   const subjectButtons = questions;
   let timer = 120 * 60 * 1000;
-  let currentSubject = "";
+  let timeLeft = 0;
   const timeLeftDisplay = document.querySelector(".timeLeft");
 
   function CreateSubjectButtons() {
@@ -33,6 +46,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     const timeOut = setInterval(() => {
       duration -= 1000;
       timeLeft = duration;
+
       let hrlLabel = Math.floor(duration / (60 * 60 * 1000));
       let minLabel = Math.floor((duration / (60 * 1000)) % 60);
       let secLabel = (duration % (60 * 1000)) / 1000;
@@ -47,7 +61,6 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
   }
   UpdateTimer(timer);
   //1. set the subject title
-  const btns = document.getElementsByClassName("subjectBtn");
 
   function CreateNumberButtons(subject) {
     const buttonDiv = document.createElement("div");
@@ -309,4 +322,17 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     document.querySelector(`.${questionId}`).classList.remove("btn-warning");
     document.querySelector(`.${questionId}`).classList.add("btn-success");
   }
+
+  document
+    .querySelector(".submitExamination")
+    .addEventListener("click", function () {
+      if (timer - timeLeft < 20 * 60 * 1000) {
+        Swal.fire({
+          icon: "info",
+          title: "SUBMITTING TOO EARLY",
+          text: "You can't submit now until 20 minutes into the examination",
+          confirmButtonText: "Continue Examination",
+        });
+      }
+    });
 });

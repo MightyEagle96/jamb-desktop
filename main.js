@@ -333,7 +333,6 @@ ipcMain.on("shutDownApp", (e, args) => {
 });
 
 ipcMain.on("getQuestions", (e, args) => {
-  console.log(args);
   if (serverIpAddress !== "") {
     GetQuestions(serverIpAddress).then((data) => {
       for (let i = 0; i < data.length; i++) {
