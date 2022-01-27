@@ -21,6 +21,8 @@ let serverIpAddress, networkTestDuration;
 
 let examinationQuestions = [];
 
+let candidate = {};
+
 let mainMenu = Menu.buildFromTemplate([]);
 
 const systemConfiguration = {
@@ -285,7 +287,7 @@ function CreateExaminationScreen() {
   examinationScreen = new BrowserWindow({
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
-  //examinationScreen.webContents.toggleDevTools();
+  examinationScreen.webContents.toggleDevTools();
   examinationScreen.fullScreen = true;
   examinationScreen.loadFile(
     `${baseFilePath}examinationScreen/examinationScreen.html`
@@ -331,9 +333,20 @@ ipcMain.on("shutDownApp", (e, args) => {
 });
 
 ipcMain.on("getQuestions", (e, args) => {
+  console.log(args);
   if (serverIpAddress !== "") {
     GetQuestions(serverIpAddress).then((data) => {
-      examinationQuestions = data;
+      for (let i = 0; i < data.length; i++) {
+        if (
+          candidate.subjectCombinations.find(
+            (sub) =>
+              sub.subject._id.toString() === data[i].subject._id.toString()
+          )
+        ) {
+          examinationQuestions.push(data[i]);
+        }
+      }
+
       if (examinationQuestions.length > 0) {
         e.sender.send("sendQuestions", examinationQuestions);
       }
@@ -377,6 +390,18 @@ ipcMain.on("login", (e, args) => {
     lobbyScreen = null;
   }
   CreateExaminationScreen();
+});
+
+//to save the candidate
+ipcMain.on("storeCandidate", (e, args) => {
+  if (args) {
+    candidate = args;
+  }
+});
+
+//to send the candidate to the renderer
+ipcMain.on("fetchCandidate", (e, args) => {
+  e.sender.send("candidate", candidate);
 });
 
 app.whenReady().then(() => {
