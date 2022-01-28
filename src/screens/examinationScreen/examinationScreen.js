@@ -1,12 +1,14 @@
 const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
+const { SaveAnswers } = require("../../utils/data");
 
 let candidateAnswers = [];
+let candidateData = {};
 
 ipcRenderer.send("fetchCandidate", "lemme have the candidate");
 
 ipcRenderer.on("candidate", (e, candidate) => {
-  console.log({ candidate });
+  candidateData = candidate;
   document.querySelector(".firstName").textContent = candidate.firstName;
   document.querySelector(".lastName").textContent = candidate.lastName;
   document.querySelector(".registrationNumber").textContent =
@@ -313,8 +315,33 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       candidateAnswers[index] = data;
     }
 
-    console.log(candidateAnswers);
+    const { subjectCombinations } = candidateData;
 
+    let subject1 = {};
+    subject1.answers = candidateAnswers.filter(
+      (c) => c.subject === subjectCombinations[0].subject.slug
+    );
+    subject1.subject = subjectCombinations[0];
+
+    let subject2 = {};
+    subject2.answers = candidateAnswers.filter(
+      (c) => c.subject === subjectCombinations[1].subject.slug
+    );
+    subject2.subject = subjectCombinations[1];
+
+    let subject3 = {};
+    subject3.answers = candidateAnswers.filter(
+      (c) => c.subject === subjectCombinations[2].subject.slug
+    );
+    subject3.subject = subjectCombinations[2];
+
+    let subject4 = {};
+    subject4.answers = candidateAnswers.filter(
+      (c) => c.subject === subjectCombinations[3].subject.slug
+    );
+    subject4.subject = subjectCombinations[3];
+
+    SaveAnswers({ candidateData, subject1, subject2, subject3, subject4 });
     //update the candidate's question answered counter
     document.querySelector(".answerCounter").textContent =
       candidateAnswers.length;
@@ -323,6 +350,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     document.querySelector(`.${questionId}`).classList.add("btn-success");
   }
 
+  //to ensure that candidates don't submit too early
   document
     .querySelector(".submitExamination")
     .addEventListener("click", function () {

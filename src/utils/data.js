@@ -1,6 +1,7 @@
 const { default: axios } = require("axios");
 const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
+const ip = require("ip");
 
 exports.port = 5000;
 
@@ -31,4 +32,18 @@ exports.LoginCandidate = async (serverIpAddress, registrationNumber) => {
       });
     }
   }
+};
+
+exports.SaveAnswers = (data) => {
+  ipcRenderer.send("channel4", "lemme have the ip address");
+  ipcRenderer.on("channel5", async (e, serverIpAddress) => {
+    if (serverIpAddress) {
+      data.ipAddress = ip.address();
+      const path = `http://${serverIpAddress}:${this.port}/saveCandidateProgress`;
+
+      try {
+        const res = await axios.post(path, data);
+      } catch (error) {}
+    }
+  });
 };
