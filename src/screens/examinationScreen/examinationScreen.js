@@ -88,10 +88,25 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       newContent.classList = `btn btn-warning me-2 mb-2 ${subject.subject.slug}-${subject.questions[i]._id}`;
       newContent.textContent = i + 1;
       newContent.addEventListener("click", function () {
+        //to change the color
+
+        for (let k = 0; k < subject.questions.length; k++) {
+          document
+            .querySelector(
+              `.${subject.subject.slug}-${subject.questions[k]._id}`
+            )
+            .classList.replace("btn-danger", "btn-warning");
+        }
+
+        document
+          .querySelector(`.${subject.subject.slug}-${subject.questions[i]._id}`)
+          .classList.replace("btn-warning", "btn-danger");
+
         //to change the number
         document.querySelector(
           `.${subject.subject.slug}-number`
         ).innerText = `Question ${i + 1}`;
+
         //to get the question for this number
         const subjectQuestions = subjectButtons.find(
           (c) => c.subject.slug === subject.subject.slug
@@ -385,8 +400,9 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     document.querySelector(".answerCounter").textContent =
       candidateAnswers.length;
     //change colour of button
-    document.querySelector(`.${questionId}`).classList.remove("btn-warning");
-    document.querySelector(`.${questionId}`).classList.add("btn-success");
+    document
+      .querySelector(`.${questionId}`)
+      .classList.replace("btn-danger", "btn-success");
   }
 
   //to ensure that candidates don't submit too early
