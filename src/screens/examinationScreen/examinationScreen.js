@@ -1,6 +1,6 @@
 const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
-const { SaveAnswers } = require("../../utils/data");
+const { SaveAnswers, GetQuestions } = require("../../utils/data");
 
 let candidateAnswers = [];
 let candidateData = {};
@@ -32,17 +32,34 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     //initialize the first questions for each subject
     for (let i = 0; i < subjectButtons.length; i++) {
       const newSubjectBtn = document.createElement("button");
-      newSubjectBtn.classList = "btn btn-success me-2 ";
+      newSubjectBtn.classList =
+        i === 0
+          ? `btn btn-success me-2 subBtn-${subjectButtons[i].subject.slug}`
+          : `btn btn-danger me-2 subBtn-${subjectButtons[i].subject.slug}`;
       newSubjectBtn.textContent = subjectButtons[i].subject.title;
       newSubjectBtn.addEventListener("click", function (e) {
         document.getElementById("subjectTitle").textContent =
           e.target.innerText;
         ToggleDivs(subjectButtons[i]);
+
+        for (let k = 0; k < subjectButtons.length; k++) {
+          document
+            .querySelector(`.subBtn-${subjectButtons[k].subject.slug}`)
+            .classList.replace("btn-success", "btn-danger");
+        }
+
+        if (
+          document.getElementById("subjectTitle").textContent ===
+          newSubjectBtn.textContent
+        ) {
+          newSubjectBtn.classList.replace("btn-danger", "btn-success");
+        }
       });
       subjectButtonsDiv.append(newSubjectBtn);
       CreateSubjectDiv(subjectButtons[i]);
     }
   }
+
   CreateSubjectButtons();
   function UpdateTimer(duration) {
     const timeOut = setInterval(() => {
@@ -317,29 +334,51 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
 
     const { subjectCombinations } = candidateData;
 
+    function GetSubjectLength(slug) {
+      const length = subjectButtons.find((q) => q.subject.slug === slug)
+        .questions.length;
+      return length;
+    }
+
+    function CalculateScore(answers, length) {
+      let score = 0;
+      answers.forEach((ans) => {
+        score += ans.score;
+      });
+
+      return Math.floor((score / length) * 100);
+    }
     let subject1 = {};
     subject1.answers = candidateAnswers.filter(
       (c) => c.subject === subjectCombinations[0].subject.slug
     );
     subject1.subject = subjectCombinations[0];
+    subject1.length = GetSubjectLength(subject1.subject.subject.slug);
+    subject1.score = CalculateScore(subject1.answers, subject1.length);
 
     let subject2 = {};
     subject2.answers = candidateAnswers.filter(
       (c) => c.subject === subjectCombinations[1].subject.slug
     );
     subject2.subject = subjectCombinations[1];
+    subject2.length = GetSubjectLength(subject2.subject.subject.slug);
+    subject2.score = CalculateScore(subject2.answers, subject2.length);
 
     let subject3 = {};
     subject3.answers = candidateAnswers.filter(
       (c) => c.subject === subjectCombinations[2].subject.slug
     );
     subject3.subject = subjectCombinations[2];
+    subject3.length = GetSubjectLength(subject3.subject.subject.slug);
+    subject3.score = CalculateScore(subject3.answers, subject3.length);
 
     let subject4 = {};
     subject4.answers = candidateAnswers.filter(
       (c) => c.subject === subjectCombinations[3].subject.slug
     );
     subject4.subject = subjectCombinations[3];
+    subject4.length = GetSubjectLength(subject4.subject.subject.slug);
+    subject4.score = CalculateScore(subject4.answers, subject4.length);
 
     SaveAnswers({ candidateData, subject1, subject2, subject3, subject4 });
     //update the candidate's question answered counter
