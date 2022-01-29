@@ -178,6 +178,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
 
     for (let i = 0; i < questions.length; i++) {
       const newQuestionDiv = document.createElement("div");
+
       const questionTextDiv = document.createElement("div");
       const optionsDiv = document.createElement("div");
       //==========
@@ -418,4 +419,21 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
         });
       }
     });
+
+  //use the arrow
+
+  function ArrowNavigationFunc() {
+    //get the the array of questions belonging to this subject
+
+    window.addEventListener("keydown", function (e) {
+      const currentSubject =
+        document.getElementById("subjectTitle").textContent;
+      const subjects = subjectButtons.filter(
+        (c) => c.subject.title === currentSubject
+      );
+      console.log({ currentSubject, subjects });
+    });
+  }
+
+  ArrowNavigationFunc();
 });
