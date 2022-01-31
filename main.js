@@ -2,7 +2,7 @@ const electron = require("electron");
 const ip = require("ip");
 const si = require("systeminformation");
 const macaddress = require("macaddress");
-const { GetQuestions } = require("./src/utils/data");
+const { GetQuestions, RandomizeQuestions } = require("./src/utils/data");
 //const { GetQuestions } = require("./src/utils/connectionStatus");
 
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain, powerSaveBlocker } =
@@ -346,6 +346,10 @@ ipcMain.on("getQuestions", (e, args) => {
               sub.subject._id.toString() === data[i].subject._id.toString()
           )
         ) {
+          data[i].questions = RandomizeQuestions(
+            data[i].questions,
+            data[i].questions.length
+          );
           examinationQuestions.push(data[i]);
         }
       }
