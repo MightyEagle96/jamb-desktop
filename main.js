@@ -287,7 +287,7 @@ function CreateExaminationScreen() {
   examinationScreen = new BrowserWindow({
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
-  examinationScreen.webContents.toggleDevTools();
+  //examinationScreen.webContents.toggleDevTools();
   examinationScreen.fullScreen = true;
   examinationScreen.loadFile(
     `${baseFilePath}examinationScreen/examinationScreen.html`
@@ -310,6 +310,10 @@ ipcMain.on("channel4", (e, args) => {
 });
 
 ipcMain.on("channel6", (e, args) => {
+  if (examinationScreen) {
+    examinationScreen.close();
+    examinationScreen = null;
+  }
   CreateCandidateLoginScreen(args);
 });
 
@@ -351,6 +355,10 @@ ipcMain.on("getQuestions", (e, args) => {
       }
     });
   }
+});
+
+ipcMain.on("resetQuestions", (e, args) => {
+  examinationQuestions = args;
 });
 app.on("ready", function () {
   powerSaveBlocker.start("prevent-display-sleep");

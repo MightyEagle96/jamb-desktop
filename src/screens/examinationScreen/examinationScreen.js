@@ -1,9 +1,15 @@
 const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
-const { SaveAnswers, GetQuestions } = require("../../utils/data");
+const {
+  SaveAnswers,
+
+  FinishExamination,
+} = require("../../utils/data");
 
 let candidateAnswers = [];
 let candidateData = {};
+
+let hasSubmitted = false;
 
 ipcRenderer.send("fetchCandidate", "lemme have the candidate");
 
@@ -75,6 +81,15 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       timeLeftDisplay.textContent = `${hours}:${minutes}:${seconds}`;
       if (duration === 0) {
         clearInterval(timeOut);
+        Swal.fire({
+          icon: "info",
+          title: "Your time is up",
+          text: "Your examination progress have been saved and your result uploaded. Kindly exit the examination hall",
+        }).then(() => {
+          hasSubmitted = true;
+
+          FinishExamination({ candidateData, hasSubmitted });
+        });
       }
     }, 1000);
   }
@@ -84,10 +99,14 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
   function CreateNumberButtons(subject) {
     const buttonDiv = document.createElement("div");
     for (let i = 0; i < subject.questions.length; i++) {
-      const newContent = document.createElement("button");
-      newContent.classList = `btn btn-warning me-2 mb-2 ${subject.subject.slug}-${subject.questions[i]._id}`;
-      newContent.textContent = i + 1;
-      newContent.addEventListener("click", function () {
+      const newButton = document.createElement("button");
+      newButton.classList = `btn btn-warning me-2 mb-2 ${subject.subject.slug}-${subject.questions[i]._id}`;
+      newButton.textContent = i + 1;
+
+      if (i == 0) {
+        newButton.classList.replace("btn-warning", "btn-danger");
+      }
+      newButton.addEventListener("click", function () {
         //to change the color
 
         for (let k = 0; k < subject.questions.length; k++) {
@@ -120,7 +139,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
           `.${subject.subject.slug}-question${i}`
         ).style.display = "block";
       });
-      buttonDiv.appendChild(newContent);
+      buttonDiv.appendChild(newButton);
     }
 
     return buttonDiv;
@@ -396,7 +415,16 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     subject4.length = GetSubjectLength(subject4.subject.subject.slug);
     subject4.score = CalculateScore(subject4.answers, subject4.length);
 
-    SaveAnswers({ candidateData, subject1, subject2, subject3, subject4 });
+    const timeRemaining = document.querySelector(".timeLeft").textContent;
+    SaveAnswers({
+      candidateData,
+      subject1,
+      subject2,
+      subject3,
+      subject4,
+      timeRemaining,
+      hasSubmitted,
+    });
     //update the candidate's question answered counter
     document.querySelector(".answerCounter").textContent =
       candidateAnswers.length;
@@ -410,12 +438,35 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
   document
     .querySelector(".submitExamination")
     .addEventListener("click", function () {
-      if (timer - timeLeft < 20 * 60 * 1000) {
+      if (timer - timeLeft < 5 * 60 * 1000) {
         Swal.fire({
           icon: "info",
           title: "SUBMITTING TOO EARLY",
           text: "You can't submit now until 20 minutes into the examination",
           confirmButtonText: "Continue Examination",
+        });
+      } else if (candidateAnswers.length < 90) {
+        Swal.fire({
+          icon: "info",
+          title: "FEW QUESTIONS ANSWERED",
+          text: "Please answer more than half of the total questions for your subject combinations",
+          confirmButtonText: "Continue Examination",
+        });
+      } else {
+        Swal.fire({
+          icon: "question",
+          title: "Submit and End examination?",
+          text: "Are you sure you want to submit and end this examination?",
+          confirmButtonText: "Yes, submit",
+          showCancelButton: true,
+          showConfirmButton: true,
+          cancelButtonText: "No do not submit",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            hasSubmitted = true;
+
+            FinishExamination({ candidateData, hasSubmitted });
+          }
         });
       }
     });

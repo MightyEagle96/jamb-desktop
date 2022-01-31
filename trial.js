@@ -1,5 +1,5 @@
-const friend = "sssss";
-const index1 = friend.lastIndexOf("s");
-const index2 = friend.indexOf("s");
+const data = {};
 
-console.log(9 / -6);
+if (data) {
+  console.log("Hallelujah");
+}

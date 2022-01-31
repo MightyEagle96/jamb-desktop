@@ -47,3 +47,32 @@ exports.SaveAnswers = (data) => {
     }
   });
 };
+
+exports.FinishExamination = (data) => {
+  ipcRenderer.send("channel4", "lemme have the ip address");
+  ipcRenderer.on("channel5", async (e, serverIpAddress) => {
+    if (serverIpAddress) {
+      const path = `http://${serverIpAddress}:${this.port}/submitExamination`;
+
+      try {
+        const res = await axios.post(path, data);
+
+        if (res) {
+          Swal.fire({
+            icon: "success",
+            title: "Examination Completed",
+            text: res.data.message,
+          }).then(() => {
+            ipcRenderer.send("storeCandidate", {});
+            ipcRenderer.send("channel6", "close this page");
+            ipcRenderer.send("resetQuestions", []);
+          });
+        }
+      } catch (error) {
+        if (error && error.response) {
+          Swal.fire({ icon: "error", text: error.response.data.message });
+        }
+      }
+    }
+  });
+};
