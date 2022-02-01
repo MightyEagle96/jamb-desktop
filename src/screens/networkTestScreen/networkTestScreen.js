@@ -39,6 +39,14 @@ function UpdateTimer(duration) {
     timeLeftDisplay.textContent = `${hours}:${minutes}:${seconds}`;
     if (duration === 0) {
       clearInterval(timeOut);
+      document.querySelector(".examinationStatus").textContent =
+        "Examination Completed";
+      document
+        .querySelector(".networkProgress")
+        .classList.remove("progress-bar-animated");
+      document
+        .querySelector(".networkProgress")
+        .classList.remove("progress-bar-striped");
       GetResult();
     }
   }, 1000);

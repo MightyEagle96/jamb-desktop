@@ -5,20 +5,20 @@ const { port } = require("./data");
 
 const connectionStatus = document.querySelector(".connectionStatus");
 exports.PerformNetworkTest = (serverIpAddress) => {
-  // const timer = setInterval(async () => {
-  //   try {
-  //     const path = `http://${serverIpAddress}:${port}/networkTest`;
-  //     const res = await axios.get(path);
-  //     if (res.data.networkTest.isActive) {
-  //       clearInterval(timer);
-  //       ipcRenderer.send("channel7", {
-  //         duration: res.data.networkTest.duration,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     ChangeConnctionStatusText();
-  //   }
-  // }, 1200);
+  const timer = setInterval(async () => {
+    try {
+      const path = `http://${serverIpAddress}:${port}/networkTest`;
+      const res = await axios.get(path);
+      if (res.data.networkTest.isActive) {
+        clearInterval(timer);
+        ipcRenderer.send("channel7", {
+          duration: res.data.networkTest.duration,
+        });
+      }
+    } catch (error) {
+      ChangeConnctionStatusText();
+    }
+  }, 1200);
 };
 
 exports.IsConnctedToServer = (serverIpAddress) => {
