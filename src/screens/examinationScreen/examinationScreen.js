@@ -11,7 +11,7 @@ let candidateAnswers = [];
 let candidateData = {};
 
 let hasSubmitted = false;
-//LookingOut();
+LookingOut();
 
 ipcRenderer.send("fetchCandidate", "lemme have the candidate");
 
