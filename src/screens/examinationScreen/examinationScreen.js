@@ -11,7 +11,7 @@ let candidateAnswers = [];
 let candidateData = {};
 
 let hasSubmitted = false;
-LookingOut();
+//LookingOut();
 
 ipcRenderer.send("fetchCandidate", "lemme have the candidate");
 
@@ -481,10 +481,137 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     window.addEventListener("keydown", function (e) {
       const currentSubject =
         document.getElementById("subjectTitle").textContent;
-      const subjects = subjectButtons.filter(
+      const rawData = subjectButtons.filter(
         (c) => c.subject.title === currentSubject
-      );
-      console.log({ currentSubject, subjects });
+      )[0];
+
+      const { questions, subject } = rawData;
+
+      let index = 0;
+      for (let i = 0; i < questions.length; i++) {
+        if (
+          document.querySelector(`.${subject.slug}-question${i}`).style
+            .display === "block"
+        ) {
+          index = i;
+        }
+      }
+
+      if (
+        e.code === "ArrowRight" &&
+        index + 1 >= 0 &&
+        index + 1 < questions.length
+      ) {
+        const increment = index + 1;
+
+        for (let i = 0; i < questions.length; i++) {
+          document.querySelector(
+            `.${subject.slug}-question${i}`
+          ).style.display = "none";
+
+          document
+            .querySelector(`.${subject.slug}-${questions[i]._id}`)
+            .classList.replace("btn-danger", "btn-warning");
+        }
+        document.querySelector(
+          `.${subject.slug}-question${index + 1}`
+        ).style.display = "block";
+
+        document
+          .querySelector(`.${subject.slug}-${questions[index + 1]._id}`)
+          .classList.replace("btn-warning", "btn-danger");
+
+        document.querySelector(
+          `.${subject.slug}-number`
+        ).textContent = `Question ${increment + 1}`;
+      }
+      if (e.code === "ArrowLeft" && index - 1 >= 0) {
+        const decrement = index - 1;
+
+        for (let i = 0; i < questions.length; i++) {
+          document.querySelector(
+            `.${subject.slug}-question${i}`
+          ).style.display = "none";
+
+          document
+            .querySelector(`.${subject.slug}-${questions[i]._id}`)
+            .classList.replace("btn-danger", "btn-warning");
+        }
+        document.querySelector(
+          `.${subject.slug}-question${index - 1}`
+        ).style.display = "block";
+
+        document
+          .querySelector(`.${subject.slug}-${questions[index - 1]._id}`)
+          .classList.replace("btn-warning", "btn-danger");
+        document.querySelector(
+          `.${subject.slug}-number`
+        ).textContent = `Question ${decrement + 1}`;
+      }
+
+      function UncheckOtherOptions() {
+        document.getElementById(
+          `${questions[index]._id}-${questions[index].optionA}`
+        ).checked = false;
+        document.getElementById(
+          `${questions[index]._id}-${questions[index].optionB}`
+        ).checked = false;
+        document.getElementById(
+          `${questions[index]._id}-${questions[index].optionC}`
+        ).checked = false;
+        document.getElementById(
+          `${questions[index]._id}-${questions[index].optionD}`
+        ).checked = false;
+      }
+
+      if (e.code === "KeyA") {
+        UncheckOtherOptions();
+        document.getElementById(
+          `${questions[index]._id}-${questions[index].optionA}`
+        ).checked = true;
+        MarkQuestion(
+          subject.slug,
+          `${subject.slug}-${questions[index]._id}`,
+          questions[index].optionA,
+          questions[index].correctAnswer
+        );
+      }
+      if (e.code === "KeyB") {
+        UncheckOtherOptions();
+        document.getElementById(
+          `${questions[index]._id}-${questions[index].optionB}`
+        ).checked = true;
+        MarkQuestion(
+          subject.slug,
+          `${subject.slug}-${questions[index]._id}`,
+          questions[index].optionB,
+          questions[index].correctAnswer
+        );
+      }
+      if (e.code === "KeyC") {
+        UncheckOtherOptions();
+        document.getElementById(
+          `${questions[index]._id}-${questions[index].optionC}`
+        ).checked = true;
+        MarkQuestion(
+          subject.slug,
+          `${subject.slug}-${questions[index]._id}`,
+          questions[index].optionC,
+          questions[index].correctAnswer
+        );
+      }
+      if (e.code === "KeyD") {
+        UncheckOtherOptions();
+        document.getElementById(
+          `${questions[index]._id}-${questions[index].optionD}`
+        ).checked = true;
+        MarkQuestion(
+          subject.slug,
+          `${subject.slug}-${questions[index]._id}`,
+          questions[index].optionD,
+          questions[index].correctAnswer
+        );
+      }
     });
   }
 
