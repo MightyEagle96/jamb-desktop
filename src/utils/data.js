@@ -105,3 +105,23 @@ exports.RandomizeQuestions = (arrayToRandomize, limit) => {
 
   return randomizedArray;
 };
+
+exports.LookingOut = () => {
+  const timer = setInterval(() => {
+    ipcRenderer.send("focusedState", "what state?");
+    ipcRenderer.on("sendMessage", (e, args) => {
+      if (!args.focused) {
+        clearInterval(timer);
+        Swal.fire({
+          icon: "warning",
+          title: "Stay on Screen",
+          text: "You are required to remain on this screen. Further attempts to navigate from this screen will result in a shutdown of this application and a termination of your examination.",
+          confirmButtonText: "Back to screen.",
+        }).then(() => {
+          ipcRenderer.send("focusedState", "what state?");
+          this.LookingOut();
+        });
+      }
+    });
+  }, 1000);
+};

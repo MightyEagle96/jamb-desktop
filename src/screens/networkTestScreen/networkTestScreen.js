@@ -2,7 +2,7 @@ const { default: axios } = require("axios");
 const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
 const ip = require("ip");
-const { port } = require("../../utils/data");
+const { port, LookingOut } = require("../../utils/data");
 const {
   IsConnctedToServer,
 
@@ -163,3 +163,4 @@ function NavigateToLoginPage() {
 }
 
 ShutDownApplication();
+LookingOut();

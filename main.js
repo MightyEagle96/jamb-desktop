@@ -19,6 +19,8 @@ let connectToServerScreen,
 
 let serverIpAddress, networkTestDuration;
 
+let focused = true;
+
 let examinationQuestions = [];
 
 let candidate = {};
@@ -251,7 +253,7 @@ function CreateLobbyScreen(pageToClose) {
   }
 
   lobbyScreen.fullScreen = true;
-  // lobbyScreen.webContents.toggleDevTools();
+  //lobbyScreen.webContents.toggleDevTools();
 
   lobbyScreen.webContents.on("before-input-event", (event, input) => {
     if (input.code == "F4" && input.alt) event.preventDefault();
@@ -426,6 +428,18 @@ app.whenReady().then(() => {
   globalShortcut.unregister("Win+R");
 });
 
+app.on("browser-window-focus", () => {
+  focused = true;
+  ipcMain.on("focusedState", (e, args) => {
+    e.sender.send("sendMessage", { focused });
+  });
+});
+app.on("browser-window-blur", (e) => {
+  focused = false;
+  ipcMain.on("focusedState", (e, args) => {
+    e.sender.send("sendMessage", { focused });
+  });
+});
 app.once("before-quit", (e) => {
   e.preventDefault();
 

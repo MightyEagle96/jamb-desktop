@@ -4,12 +4,14 @@ const {
   SaveAnswers,
 
   FinishExamination,
+  LookingOut,
 } = require("../../utils/data");
 
 let candidateAnswers = [];
 let candidateData = {};
 
 let hasSubmitted = false;
+LookingOut();
 
 ipcRenderer.send("fetchCandidate", "lemme have the candidate");
 
