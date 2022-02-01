@@ -90,6 +90,6 @@ exports.GetCenterDetails = async (serverIpAddress) => {
 
   if (res && res.data.centerDetails) {
     document.querySelector(".centerName").textContent =
-      "Center Name: " + res.data.centerDetails.centerName;
+      "Centre Name: " + res.data.centerDetails.centerName;
   }
 };
