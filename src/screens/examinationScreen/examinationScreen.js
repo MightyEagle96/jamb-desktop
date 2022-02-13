@@ -498,7 +498,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       }
 
       if (
-        e.code === "ArrowRight" &&
+        (e.code === "ArrowRight" || e.code === "KeyN") &&
         index + 1 >= 0 &&
         index + 1 < questions.length
       ) {
@@ -525,7 +525,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
           `.${subject.slug}-number`
         ).textContent = `Question ${increment + 1}`;
       }
-      if (e.code === "ArrowLeft" && index - 1 >= 0) {
+      if ((e.code === "ArrowLeft" || e.code === "KeyP") && index - 1 >= 0) {
         const decrement = index - 1;
 
         for (let i = 0; i < questions.length; i++) {
