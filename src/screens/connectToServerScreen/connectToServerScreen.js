@@ -27,14 +27,14 @@ const connectionStatus = document.querySelector(".connectionStatus");
 
 // const networkTestDiv = document.querySelector(".networkTest");
 
-connectBtn.addEventListener("click", TestServer);
+connectBtn.addEventListener("click", ConnectToServer);
 
 window.addEventListener("keydown", function (e) {
-  if (e.code === "Enter") {
-    TestServer();
+  if (e.code === "Enter" || e.code === "NumpadEnter") {
+    ConnectToServer();
   }
 });
-async function TestServer() {
+async function ConnectToServer() {
   const serverIp = document.getElementById("serverIp").value;
 
   try {

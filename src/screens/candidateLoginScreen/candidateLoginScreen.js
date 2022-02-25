@@ -12,6 +12,11 @@ ipcRenderer.on("channel5", (e, serverIpAddress) => {
 
   document.querySelector(".login").addEventListener("click", login);
 
+  window.addEventListener("keydown", function (e) {
+    if (e.code === "Enter" || e.code === "NumpadEnter") {
+      login();
+    }
+  });
   function login() {
     const registrationNumber = document.querySelector(
       ".registrationNumber"

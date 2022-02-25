@@ -1,7 +1,8 @@
 const { default: axios } = require("axios");
-const { ipcRenderer, BrowserWindow } = require("electron");
+const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
 const { port } = require("./data");
+const ip = require("ip");
 
 const connectionStatus = document.querySelector(".connectionStatus");
 exports.PerformNetworkTest = (serverIpAddress) => {
@@ -25,7 +26,7 @@ exports.IsConnctedToServer = (serverIpAddress) => {
   const serverConnection = setInterval(async () => {
     try {
       const path = `http://${serverIpAddress}:${port}/serverConnected`;
-      const res = await axios(path);
+      const res = await axios.post(path, { ipAddress: ip.address() });
       if (res && res.data.connected && !res.data.shutDown) {
         connectionStatus.classList.add("text-success");
         connectionStatus.textContent = "CONNECTED";
@@ -33,10 +34,7 @@ exports.IsConnctedToServer = (serverIpAddress) => {
       } else {
         ipcRenderer.send("shutDownApp", "Oya shut down");
       }
-      //else if(res && res.data)
     } catch (error) {
-      console.error({ error });
-      console.log(error.message);
       ChangeConnctionStatusText();
       if (error && error.message && !error.response) {
         clearInterval(serverConnection);

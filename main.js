@@ -422,6 +422,9 @@ app.whenReady().then(() => {
     app.quit();
   });
 
+  globalShortcut.register("Control+Shift+I", () => {
+    BrowserWindow.getFocusedWindow().webContents.toggleDevTools();
+  });
   globalShortcut.register("Super+Tab", () => {
     app.quit();
   });
