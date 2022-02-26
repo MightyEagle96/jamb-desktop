@@ -77,14 +77,15 @@ exports.FinishExamination = (data) => {
   });
 };
 
-exports.RandomizeQuestions = (arrayToRandomize, limit) => {
+exports.RandomizeQuestions = (arrayToRandomize) => {
+  console.log(arrayToRandomize.length);
   let randomizedArray = [];
   let array = [];
-  for (let i = 0; i < limit; i++) {
-    let x = Math.floor(Math.random() * limit);
+  for (let i = 0; i < arrayToRandomize.length; i++) {
+    let x = Math.floor(Math.random() * arrayToRandomize.length);
     if (array.includes(x)) {
-      for (let j = 0; j < limit; j++) {
-        let y = Math.floor(Math.random() * limit);
+      for (let j = 0; j < arrayToRandomize.length; j++) {
+        let y = Math.floor(Math.random() * arrayToRandomize.length);
         if (array.includes(y) === false && array[i] !== y) {
           array.push(y);
           break;
@@ -92,8 +93,11 @@ exports.RandomizeQuestions = (arrayToRandomize, limit) => {
       }
     } else array.push(x);
   }
-  if (array.length !== limit && array.length < limit) {
-    for (let i = 0; i < limit; i++) {
+  if (
+    array.length !== arrayToRandomize.length &&
+    array.length < arrayToRandomize.length
+  ) {
+    for (let i = 0; i < arrayToRandomize.length; i++) {
       if (!array.includes(i)) array.push(i);
     }
   }
