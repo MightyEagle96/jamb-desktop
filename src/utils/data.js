@@ -78,7 +78,6 @@ exports.FinishExamination = (data) => {
 };
 
 exports.RandomizeQuestions = (arrayToRandomize) => {
-  console.log(arrayToRandomize.length);
   let randomizedArray = [];
   let array = [];
   for (let i = 0; i < arrayToRandomize.length; i++) {
@@ -111,21 +110,94 @@ exports.RandomizeQuestions = (arrayToRandomize) => {
 };
 
 exports.LookingOut = () => {
-  const timer = setInterval(() => {
-    ipcRenderer.send("focusedState", "what state?");
-    ipcRenderer.on("sendMessage", (e, args) => {
-      if (!args.focused) {
-        clearInterval(timer);
-        Swal.fire({
-          icon: "warning",
-          title: "Stay on Screen",
-          text: "You are required to remain on this screen. Further attempts to navigate from this screen will result in a shutdown of this application and a termination of your examination.",
-          confirmButtonText: "Back to screen.",
-        }).then(() => {
-          ipcRenderer.send("focusedState", "what state?");
-          this.LookingOut();
-        });
-      }
-    });
-  }, 1000);
+  // const timer = setInterval(() => {
+  //   ipcRenderer.send("focusedState", "what state?");
+  //   ipcRenderer.on("sendMessage", (e, args) => {
+  //     if (!args.focused) {
+  //       clearInterval(timer);
+  //       Swal.fire({
+  //         icon: "warning",
+  //         title: "Stay on Screen",
+  //         text: "You are required to remain on this screen. Further attempts to navigate from this screen will result in a shutdown of this application and a termination of your examination.",
+  //         confirmButtonText: "Back to screen.",
+  //       }).then(() => {
+  //         ipcRenderer.send("focusedState", "what state?");
+  //         this.LookingOut();
+  //       });
+  //     }
+  //   });
+  // }, 1000);
+};
+
+const GetGroupedQuestions = (array) => {
+  const groupedQuestions = [];
+
+  let currentGroup = 0;
+  for (let i = 0; i < array.length; i++) {
+    if (array[i].startGroup) {
+      currentGroup = i;
+      groupedQuestions.push({
+        started: true,
+        startPosition: currentGroup,
+        stopped: false,
+        stopPosition: 0,
+      });
+    }
+    if (array[i].stopGroup) {
+      const index = groupedQuestions.findIndex(
+        (c) => c.startPosition === currentGroup
+      );
+      groupedQuestions[index].stopped = true;
+      groupedQuestions[index].stopPosition = i;
+    }
+  }
+  return groupedQuestions;
+};
+
+function PopulateGroupQuestions(array, startgroup, stopGroup) {
+  const questionArray = [];
+  for (let i = startgroup; i < stopGroup + 1; i++) {
+    array[i].grouped = true;
+
+    questionArray.push(array[i]);
+  }
+  return questionArray;
+}
+
+const OrganiseArray = (array) => {
+  const groupedQuestions = GetGroupedQuestions(array);
+
+  const populatedGroupQuestions = [];
+  for (let i = 0; i < groupedQuestions.length; i++) {
+    const question = PopulateGroupQuestions(
+      array,
+      groupedQuestions[i].startPosition,
+      groupedQuestions[i].stopPosition
+    );
+    populatedGroupQuestions.push(question);
+  }
+
+  array.forEach((element) => {
+    if (!element.grouped) {
+      populatedGroupQuestions.push(element);
+    }
+  });
+
+  return populatedGroupQuestions;
+};
+
+exports.FinalOutput = (array) => {
+  const finalArray = [];
+  const processedArray = this.RandomizeQuestions(OrganiseArray(array));
+
+  for (let i = 0; i < processedArray.length; i++) {
+    if (processedArray[i].length) {
+      processedArray[i].forEach((element) => {
+        finalArray.push(element);
+      });
+    } else {
+      finalArray.push(processedArray[i]);
+    }
+  }
+  return finalArray;
 };

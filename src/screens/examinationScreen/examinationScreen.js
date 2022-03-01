@@ -27,6 +27,7 @@ ipcRenderer.on("candidate", (e, candidate) => {
 
 ipcRenderer.send("getQuestions", "Lemme have the questions");
 ipcRenderer.on("sendQuestions", (e, questions) => {
+  console.log(questions);
   const subjectButtons = questions;
   let timer = 120 * 60 * 1000;
   let timeLeft = 0;
