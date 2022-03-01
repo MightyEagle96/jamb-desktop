@@ -77,6 +77,21 @@ exports.FinishExamination = (data) => {
   });
 };
 
+exports.GetSavedProgress = async (serverIpAddress, id) => {
+  let progress = {};
+  const path = `http://${serverIpAddress}:${this.port}/getProgress/${id}`;
+
+  try {
+    const res = await axios.get(path);
+    progress = res.data.progress;
+  } catch (error) {
+    if (error && error.response) {
+      Swal.fire({ icon: "error", text: error.response.data.message });
+    }
+  }
+  return progress;
+};
+
 exports.RandomizeQuestions = (arrayToRandomize) => {
   let randomizedArray = [];
   let array = [];

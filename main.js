@@ -6,6 +6,7 @@ const {
   GetQuestions,
   RandomizeQuestions,
   FinalOutput,
+  GetSavedProgress,
 } = require("./src/utils/data");
 //const { GetQuestions } = require("./src/utils/connectionStatus");
 
@@ -364,6 +365,13 @@ ipcMain.on("getQuestions", (e, args) => {
   }
 });
 
+ipcMain.on("GetSavedProgress", (e, args) => {
+  if (serverIpAddress !== "") {
+    GetSavedProgress(serverIpAddress, candidate._id).then((progress) => {
+      e.sender.send("MySavedProgress", progress);
+    });
+  }
+});
 ipcMain.on("resetQuestions", (e, args) => {
   examinationQuestions = args;
 });

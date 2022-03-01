@@ -5,16 +5,44 @@ const {
 
   FinishExamination,
   LookingOut,
+  GetSavedProgress,
 } = require("../../utils/data");
 
 let candidateAnswers = [];
 let candidateData = {};
-
+let timer = 0;
+let timeLeft = 0;
 let hasSubmitted = false;
 LookingOut();
 
-ipcRenderer.send("fetchCandidate", "lemme have the candidate");
+function UpdateTimer(duration) {
+  const timeLeftDisplay = document.querySelector(".timeLeft");
+  const timeOut = setInterval(() => {
+    duration -= 1000;
+    timeLeft = duration;
 
+    let hrlLabel = Math.floor(duration / (60 * 60 * 1000));
+    let minLabel = Math.floor((duration / (60 * 1000)) % 60);
+    let secLabel = (duration % (60 * 1000)) / 1000;
+    const hours = hrlLabel > 9 ? hrlLabel : `0${hrlLabel}`;
+    const minutes = minLabel > 9 ? minLabel : `0${minLabel}`;
+    const seconds = secLabel > 9 ? secLabel : `0${secLabel}`;
+    timeLeftDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+    if (duration === 0) {
+      clearInterval(timeOut);
+      Swal.fire({
+        icon: "info",
+        title: "Your time is up",
+        text: "Your examination progress have been saved and your result uploaded. Kindly exit the examination hall",
+      }).then(() => {
+        hasSubmitted = true;
+
+        FinishExamination({ candidateData, hasSubmitted });
+      });
+    }
+  }, 1000);
+}
+ipcRenderer.send("fetchCandidate", "lemme have the candidate");
 ipcRenderer.on("candidate", (e, candidate) => {
   candidateData = candidate;
   document.querySelector(".firstName").textContent = candidate.firstName;
@@ -27,11 +55,8 @@ ipcRenderer.on("candidate", (e, candidate) => {
 
 ipcRenderer.send("getQuestions", "Lemme have the questions");
 ipcRenderer.on("sendQuestions", (e, questions) => {
-  console.log(questions);
   const subjectButtons = questions;
-  let timer = 120 * 60 * 1000;
-  let timeLeft = 0;
-  const timeLeftDisplay = document.querySelector(".timeLeft");
+  timer = 120 * 60 * 1000;
 
   function CreateSubjectButtons() {
     const subjectButtonsDiv = document.querySelector(".subjectButtonsDiv");
@@ -43,8 +68,8 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       const newSubjectBtn = document.createElement("button");
       newSubjectBtn.classList =
         i === 0
-          ? `btn btn-success me-2 subBtn-${subjectButtons[i].subject.slug}`
-          : `btn btn-danger me-2 subBtn-${subjectButtons[i].subject.slug}`;
+          ? `btn btn-success me-2 subBtn_${subjectButtons[i].subject.slug}`
+          : `btn btn-danger me-2 subBtn_${subjectButtons[i].subject.slug}`;
       newSubjectBtn.textContent = subjectButtons[i].subject.title;
       newSubjectBtn.addEventListener("click", function (e) {
         document.getElementById("subjectTitle").textContent =
@@ -53,7 +78,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
 
         for (let k = 0; k < subjectButtons.length; k++) {
           document
-            .querySelector(`.subBtn-${subjectButtons[k].subject.slug}`)
+            .querySelector(`.subBtn_${subjectButtons[k].subject.slug}`)
             .classList.replace("btn-success", "btn-danger");
         }
 
@@ -70,40 +95,14 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
   }
 
   CreateSubjectButtons();
-  function UpdateTimer(duration) {
-    const timeOut = setInterval(() => {
-      duration -= 1000;
-      timeLeft = duration;
 
-      let hrlLabel = Math.floor(duration / (60 * 60 * 1000));
-      let minLabel = Math.floor((duration / (60 * 1000)) % 60);
-      let secLabel = (duration % (60 * 1000)) / 1000;
-      const hours = hrlLabel > 9 ? hrlLabel : `0${hrlLabel}`;
-      const minutes = minLabel > 9 ? minLabel : `0${minLabel}`;
-      const seconds = secLabel > 9 ? secLabel : `0${secLabel}`;
-      timeLeftDisplay.textContent = `${hours}:${minutes}:${seconds}`;
-      if (duration === 0) {
-        clearInterval(timeOut);
-        Swal.fire({
-          icon: "info",
-          title: "Your time is up",
-          text: "Your examination progress have been saved and your result uploaded. Kindly exit the examination hall",
-        }).then(() => {
-          hasSubmitted = true;
-
-          FinishExamination({ candidateData, hasSubmitted });
-        });
-      }
-    }, 1000);
-  }
-  UpdateTimer(timer);
   //1. set the subject title
 
   function CreateNumberButtons(subject) {
     const buttonDiv = document.createElement("div");
     for (let i = 0; i < subject.questions.length; i++) {
       const newButton = document.createElement("button");
-      newButton.classList = `btn btn-warning me-2 mb-2 ${subject.subject.slug}-${subject.questions[i]._id}`;
+      newButton.classList = `btn btn-warning me-2 mb-2 ${subject.subject.slug}_${subject.questions[i]._id}`;
       newButton.textContent = i + 1;
 
       if (i == 0) {
@@ -115,18 +114,18 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
         for (let k = 0; k < subject.questions.length; k++) {
           document
             .querySelector(
-              `.${subject.subject.slug}-${subject.questions[k]._id}`
+              `.${subject.subject.slug}_${subject.questions[k]._id}`
             )
             .classList.replace("btn-danger", "btn-warning");
         }
 
         document
-          .querySelector(`.${subject.subject.slug}-${subject.questions[i]._id}`)
+          .querySelector(`.${subject.subject.slug}_${subject.questions[i]._id}`)
           .classList.replace("btn-warning", "btn-danger");
 
         //to change the number
         document.querySelector(
-          `.${subject.subject.slug}-number`
+          `.${subject.subject.slug}_number`
         ).innerText = `Question ${i + 1}`;
 
         //to get the question for this number
@@ -135,11 +134,11 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
         ).questions;
         for (let k = 0; k < subjectQuestions.length; k++) {
           document.querySelector(
-            `.${subject.subject.slug}-question${k}`
+            `.${subject.subject.slug}_question${k}`
           ).style.display = "none";
         }
         document.querySelector(
-          `.${subject.subject.slug}-question${i}`
+          `.${subject.subject.slug}_question${i}`
         ).style.display = "block";
       });
       buttonDiv.appendChild(newButton);
@@ -154,9 +153,9 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     const questionTextDiv = document.createElement("div");
     const questionContainer = document.createElement("div");
     questionTextDiv.classList = "mt-3 h4";
-    questionTextDiv.classList.add(`questionDiv-${subject.slug}`);
+    questionTextDiv.classList.add(`questionDiv_${subject.slug}`);
     questionNumberDiv.classList = "mt-3 h4";
-    questionNumberDiv.classList.add(`${subject.subject.slug}-number`);
+    questionNumberDiv.classList.add(`${subject.subject.slug}_number`);
 
     CreateSubjectQuestionsDiv(subject).forEach((sub) =>
       questionContainer.append(sub)
@@ -179,7 +178,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       `.${[subjectButtons[0].subject.slug]}`
     ).style.display = "block";
     document.querySelector(
-      `.${subjectButtons[0].subject.slug}-number`
+      `.${subjectButtons[0].subject.slug}_number`
     ).textContent = "Question 1";
   }
 
@@ -212,13 +211,13 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionA.value = questions[i].optionA;
       optionA.setAttribute(
         "name",
-        `${subject.subject.slug}-${questions[i]._id}`
+        `${subject.subject.slug}_${questions[i]._id}`
       );
-      optionA.setAttribute("id", `${questions[i]._id}-${questions[i].optionA}`);
+      optionA.setAttribute("id", `${questions[i]._id}_${questions[i].optionA}`);
       optionA.addEventListener("click", function () {
         MarkQuestion(
           subject.subject.slug,
-          `${subject.subject.slug}-${questions[i]._id}`,
+          `${subject.subject.slug}_${questions[i]._id}`,
           questions[i].optionA,
           questions[i].correctAnswer
         );
@@ -228,9 +227,10 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       labelOptionA.className = "form-check-label";
       labelOptionA.setAttribute(
         "for",
-        `${questions[i]._id}-${questions[i].optionA}`
+        `${questions[i]._id}_${questions[i].optionA}`
       );
       labelOptionA.textContent = `A. ${questions[i].optionA}`;
+
       divA.append(labelOptionA);
       //================
       const divB = document.createElement("div");
@@ -241,13 +241,13 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionB.value = questions[i].optionB;
       optionB.setAttribute(
         "name",
-        `${subject.subject.slug}-${questions[i]._id}`
+        `${subject.subject.slug}_${questions[i]._id}`
       );
-      optionB.setAttribute("id", `${questions[i]._id}-${questions[i].optionB}`);
+      optionB.setAttribute("id", `${questions[i]._id}_${questions[i].optionB}`);
       optionB.addEventListener("click", function () {
         MarkQuestion(
           subject.subject.slug,
-          `${subject.subject.slug}-${questions[i]._id}`,
+          `${subject.subject.slug}_${questions[i]._id}`,
           questions[i].optionB,
           questions[i].correctAnswer
         );
@@ -257,7 +257,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       labeloptionB.className = "form-check-label";
       labeloptionB.setAttribute(
         "for",
-        `${questions[i]._id}-${questions[i].optionB}`
+        `${questions[i]._id}_${questions[i].optionB}`
       );
       labeloptionB.textContent = `B. ${questions[i].optionB}`;
       divB.append(labeloptionB);
@@ -270,13 +270,13 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionC.value = questions[i].optionC;
       optionC.setAttribute(
         "name",
-        `${subject.subject.slug}-${questions[i]._id}`
+        `${subject.subject.slug}_${questions[i]._id}`
       );
-      optionC.setAttribute("id", `${questions[i]._id}-${questions[i].optionC}`);
+      optionC.setAttribute("id", `${questions[i]._id}_${questions[i].optionC}`);
       optionC.addEventListener("click", function () {
         MarkQuestion(
           subject.subject.slug,
-          `${subject.subject.slug}-${questions[i]._id}`,
+          `${subject.subject.slug}_${questions[i]._id}`,
           questions[i].optionC,
           questions[i].correctAnswer
         );
@@ -286,7 +286,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       labeloptionC.className = "form-check-label";
       labeloptionC.setAttribute(
         "for",
-        `${questions[i]._id}-${questions[i].optionC}`
+        `${questions[i]._id}_${questions[i].optionC}`
       );
       labeloptionC.textContent = `C. ${questions[i].optionC}`;
       divC.append(labeloptionC);
@@ -298,14 +298,14 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionD.className = "form-check-input";
       optionD.setAttribute(
         "name",
-        `${subject.subject.slug}-${questions[i]._id}`
+        `${subject.subject.slug}_${questions[i]._id}`
       );
       optionD.value = questions[i].optionD;
-      optionD.setAttribute("id", `${questions[i]._id}-${questions[i].optionD}`);
+      optionD.setAttribute("id", `${questions[i]._id}_${questions[i].optionD}`);
       optionD.addEventListener("click", function () {
         MarkQuestion(
           subject.subject.slug,
-          `${subject.subject.slug}-${questions[i]._id}`,
+          `${subject.subject.slug}_${questions[i]._id}`,
           questions[i].optionD,
           questions[i].correctAnswer
         );
@@ -315,7 +315,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       labeloptionD.className = "form-check-label";
       labeloptionD.setAttribute(
         "for",
-        `${questions[i]._id}-${questions[i].optionD}`
+        `${questions[i]._id}_${questions[i].optionD}`
       );
       labeloptionD.textContent = `D. ${questions[i].optionD}`;
       divD.append(labeloptionD);
@@ -331,7 +331,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       optionsDiv.append(divD);
       questionTextDiv.textContent = questions[i].question;
       questionTextDiv.classList = "questionText";
-      newQuestionDiv.classList = `${subject.subject.slug}-question${i} p-3`;
+      newQuestionDiv.classList = `${subject.subject.slug}_question${i} p-3`;
       newQuestionDiv.append(questionTextDiv);
       newQuestionDiv.append(optionsDiv);
       subjectQuestionDivs.push(newQuestionDiv);
@@ -344,14 +344,14 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       for (let i = 0; i < subjectButtons.length; i++) {
         for (let k = 0; k < subjectButtons[i].questions.length; k++) {
           document.querySelector(
-            `.${subjectButtons[i].subject.slug}-question${k}`
+            `.${subjectButtons[i].subject.slug}_question${k}`
           ).style.display = "none";
         }
         document.querySelector(
-          `.${subjectButtons[i].subject.slug}-number`
+          `.${subjectButtons[i].subject.slug}_number`
         ).innerText = "Question 1";
         document.querySelector(
-          `.${subjectButtons[i].subject.slug}-question${0}`
+          `.${subjectButtons[i].subject.slug}_question${0}`
         ).style.display = "block";
       }
     }
@@ -425,7 +425,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       subject2,
       subject3,
       subject4,
-      timeRemaining,
+      timeLeft,
       hasSubmitted,
     });
     //update the candidate's question answered counter
@@ -491,7 +491,7 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       let index = 0;
       for (let i = 0; i < questions.length; i++) {
         if (
-          document.querySelector(`.${subject.slug}-question${i}`).style
+          document.querySelector(`.${subject.slug}_question${i}`).style
             .display === "block"
         ) {
           index = i;
@@ -507,23 +507,23 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
 
         for (let i = 0; i < questions.length; i++) {
           document.querySelector(
-            `.${subject.slug}-question${i}`
+            `.${subject.slug}_question${i}`
           ).style.display = "none";
 
           document
-            .querySelector(`.${subject.slug}-${questions[i]._id}`)
+            .querySelector(`.${subject.slug}_${questions[i]._id}`)
             .classList.replace("btn-danger", "btn-warning");
         }
         document.querySelector(
-          `.${subject.slug}-question${index + 1}`
+          `.${subject.slug}_question${index + 1}`
         ).style.display = "block";
 
         document
-          .querySelector(`.${subject.slug}-${questions[index + 1]._id}`)
+          .querySelector(`.${subject.slug}_${questions[index + 1]._id}`)
           .classList.replace("btn-warning", "btn-danger");
 
         document.querySelector(
-          `.${subject.slug}-number`
+          `.${subject.slug}_number`
         ).textContent = `Question ${increment + 1}`;
       }
       if ((e.code === "ArrowLeft" || e.code === "KeyP") && index - 1 >= 0) {
@@ -531,48 +531,48 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
 
         for (let i = 0; i < questions.length; i++) {
           document.querySelector(
-            `.${subject.slug}-question${i}`
+            `.${subject.slug}_question${i}`
           ).style.display = "none";
 
           document
-            .querySelector(`.${subject.slug}-${questions[i]._id}`)
+            .querySelector(`.${subject.slug}_${questions[i]._id}`)
             .classList.replace("btn-danger", "btn-warning");
         }
         document.querySelector(
-          `.${subject.slug}-question${index - 1}`
+          `.${subject.slug}_question${index - 1}`
         ).style.display = "block";
 
         document
-          .querySelector(`.${subject.slug}-${questions[index - 1]._id}`)
+          .querySelector(`.${subject.slug}_${questions[index - 1]._id}`)
           .classList.replace("btn-warning", "btn-danger");
         document.querySelector(
-          `.${subject.slug}-number`
+          `.${subject.slug}_number`
         ).textContent = `Question ${decrement + 1}`;
       }
 
       function UncheckOtherOptions() {
         document.getElementById(
-          `${questions[index]._id}-${questions[index].optionA}`
+          `${questions[index]._id}_${questions[index].optionA}`
         ).checked = false;
         document.getElementById(
-          `${questions[index]._id}-${questions[index].optionB}`
+          `${questions[index]._id}_${questions[index].optionB}`
         ).checked = false;
         document.getElementById(
-          `${questions[index]._id}-${questions[index].optionC}`
+          `${questions[index]._id}_${questions[index].optionC}`
         ).checked = false;
         document.getElementById(
-          `${questions[index]._id}-${questions[index].optionD}`
+          `${questions[index]._id}_${questions[index].optionD}`
         ).checked = false;
       }
 
       if (e.code === "KeyA") {
         UncheckOtherOptions();
         document.getElementById(
-          `${questions[index]._id}-${questions[index].optionA}`
+          `${questions[index]._id}_${questions[index].optionA}`
         ).checked = true;
         MarkQuestion(
           subject.slug,
-          `${subject.slug}-${questions[index]._id}`,
+          `${subject.slug}_${questions[index]._id}`,
           questions[index].optionA,
           questions[index].correctAnswer
         );
@@ -580,11 +580,11 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       if (e.code === "KeyB") {
         UncheckOtherOptions();
         document.getElementById(
-          `${questions[index]._id}-${questions[index].optionB}`
+          `${questions[index]._id}_${questions[index].optionB}`
         ).checked = true;
         MarkQuestion(
           subject.slug,
-          `${subject.slug}-${questions[index]._id}`,
+          `${subject.slug}_${questions[index]._id}`,
           questions[index].optionB,
           questions[index].correctAnswer
         );
@@ -592,11 +592,11 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       if (e.code === "KeyC") {
         UncheckOtherOptions();
         document.getElementById(
-          `${questions[index]._id}-${questions[index].optionC}`
+          `${questions[index]._id}_${questions[index].optionC}`
         ).checked = true;
         MarkQuestion(
           subject.slug,
-          `${subject.slug}-${questions[index]._id}`,
+          `${subject.slug}_${questions[index]._id}`,
           questions[index].optionC,
           questions[index].correctAnswer
         );
@@ -604,11 +604,11 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
       if (e.code === "KeyD") {
         UncheckOtherOptions();
         document.getElementById(
-          `${questions[index]._id}-${questions[index].optionD}`
+          `${questions[index]._id}_${questions[index].optionD}`
         ).checked = true;
         MarkQuestion(
           subject.slug,
-          `${subject.slug}-${questions[index]._id}`,
+          `${subject.slug}_${questions[index]._id}`,
           questions[index].optionD,
           questions[index].correctAnswer
         );
@@ -618,3 +618,44 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
 
   ArrowNavigationFunc();
 });
+
+setTimeout(() => {
+  ipcRenderer.send("GetSavedProgress", "Can I have my progress");
+  ipcRenderer.on("MySavedProgress", (e, progress) => {
+    if (progress) {
+      console.log(progress);
+      const timeRemaining = progress.timeLeft;
+
+      UpdateTimer(timeRemaining);
+
+      let savedAnswers = [];
+      const { subject1, subject2, subject3, subject4 } = progress;
+
+      function populateCandidateAnswers(subject) {
+        const { answers } = subject;
+        answers.forEach((element) => {
+          savedAnswers.push(element);
+          document
+            .querySelector(`.${element.questionId}`)
+            .classList.replace("btn-warning", "btn-success");
+
+          document.getElementById(
+            `${element.questionId.split("_")[1]}_${element.candidateAnswer}`
+          ).checked = true;
+        });
+      }
+
+      populateCandidateAnswers(subject1);
+      populateCandidateAnswers(subject2);
+      populateCandidateAnswers(subject3);
+      populateCandidateAnswers(subject4);
+
+      candidateAnswers = savedAnswers;
+
+      document.querySelector(".answerCounter").textContent =
+        candidateAnswers.length;
+    } else {
+      UpdateTimer(timer);
+    }
+  });
+}, 1000);
