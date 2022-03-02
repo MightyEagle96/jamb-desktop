@@ -418,7 +418,6 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     subject4.length = GetSubjectLength(subject4.subject.subject.slug);
     subject4.score = CalculateScore(subject4.answers, subject4.length);
 
-    const timeRemaining = document.querySelector(".timeLeft").textContent;
     SaveAnswers({
       candidateData,
       subject1,
@@ -638,6 +637,9 @@ setTimeout(() => {
           document
             .querySelector(`.${element.questionId}`)
             .classList.replace("btn-warning", "btn-success");
+          document
+            .querySelector(`.${element.questionId}`)
+            .classList.replace("btn-danger", "btn-success");
 
           document.getElementById(
             `${element.questionId.split("_")[1]}_${element.candidateAnswer}`
