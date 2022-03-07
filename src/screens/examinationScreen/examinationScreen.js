@@ -1,5 +1,11 @@
 const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
+
+const EventEmitter = require("events");
+
+const eventEmitter = new EventEmitter();
+
+eventEmitter.setMaxListeners(0);
 const {
   SaveAnswers,
 

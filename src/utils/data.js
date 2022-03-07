@@ -19,6 +19,7 @@ exports.LoginCandidate = async (serverIpAddress, registrationNumber) => {
     const res = await axios.post(path, { registrationNumber });
     if (res && res.data) {
       const { candidate } = res.data;
+      console.log(candidate);
       ipcRenderer.send("storeCandidate", candidate);
 
       ipcRenderer.send("login", "proceedToLogin");

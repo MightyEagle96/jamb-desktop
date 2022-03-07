@@ -5,56 +5,79 @@ const { port } = require("./data");
 const ip = require("ip");
 
 const connectionStatus = document.querySelector(".connectionStatus");
-exports.PerformNetworkTest = (serverIpAddress) => {
-  const timer = setInterval(async () => {
-    try {
-      const path = `http://${serverIpAddress}:${port}/networkTest`;
-      const res = await axios.get(path);
-      if (res.data.networkTest.isActive) {
-        clearInterval(timer);
-        ipcRenderer.send("channel7", {
-          duration: res.data.networkTest.duration,
-        });
-      }
-    } catch (error) {
-      ChangeConnctionStatusText();
+
+function GetServerIpAddress() {
+  let serverAddress = "";
+  ipcRenderer.send("channel4", "Server IP Address");
+  ipcRenderer.on("channel5", (e, args) => {
+    serverAddress = args;
+  });
+
+  return serverAddress;
+}
+
+const serverIp = GetServerIpAddress();
+
+exports.PerformNetworkTest = () => {
+  ipcRenderer.send("channel4", "Server Ip Address");
+  ipcRenderer.on("channel5", (e, serverIpAddress) => {
+    if (serverIpAddress) {
+      const timer = setInterval(async () => {
+        try {
+          const path = `http://${serverIpAddress}:${port}/networkTest`;
+          const res = await axios.get(path);
+          if (res.data.networkTest.isActive) {
+            clearInterval(timer);
+            ipcRenderer.send("channel7", {
+              duration: res.data.networkTest.duration,
+            });
+          }
+        } catch (error) {
+          ChangeConnctionStatusText();
+        }
+      }, 1200);
     }
-  }, 1200);
+  });
 };
 
-exports.IsConnctedToServer = (serverIpAddress) => {
-  const serverConnection = setInterval(async () => {
-    try {
-      const path = `http://${serverIpAddress}:${port}/serverConnected`;
-      const res = await axios.post(path, { ipAddress: ip.address() });
-      if (res && res.data.connected && !res.data.shutDown) {
-        connectionStatus.classList.add("text-success");
-        connectionStatus.textContent = "CONNECTED";
-        connectionStatus.classList.remove("text-danger");
-      } else {
-        ipcRenderer.send("shutDownApp", "Oya shut down");
-      }
-    } catch (error) {
-      ChangeConnctionStatusText();
-      if (error && error.message && !error.response) {
-        clearInterval(serverConnection);
-        Swal.fire({
-          icon: "warning",
-          titleText: "Network Connection Lost",
-          confirmButtonText: "Retry connection",
-        }).then(() => {
-          ipcRenderer.send("channel4", "Please let me have the IP address");
-          ipcRenderer.on("channel5", (e, args) => {
-            this.IsConnctedToServer(args);
-            console.log(args);
-          });
-        });
-      } else if (error && error.response.data.message) {
-        ipcRenderer.send("connectToServer", true);
-        clearInterval(serverConnection);
-      }
+exports.IsConnctedToServer = () => {
+  ipcRenderer.send("channel4", "Server Ip Address");
+  ipcRenderer.on("channel5", (e, serverIpAddress) => {
+    if (serverIpAddress) {
+      console.log(serverIpAddress);
+      const serverConnection = setInterval(async () => {
+        try {
+          const path = `http://${serverIpAddress}:${port}/serverConnected`;
+          const res = await axios.post(path, { ipAddress: ip.address() });
+          if (res && res.data.connected && !res.data.shutDown) {
+            connectionStatus.classList.add("text-success");
+            connectionStatus.textContent = "CONNECTED";
+            connectionStatus.classList.remove("text-danger");
+          } else {
+            ipcRenderer.send("shutDownApp", "Oya shut down");
+          }
+        } catch (error) {
+          ChangeConnctionStatusText();
+          if (error && error.message && !error.response) {
+            clearInterval(serverConnection);
+            Swal.fire({
+              icon: "warning",
+              titleText: "Network Connection Lost",
+              confirmButtonText: "Retry connection",
+            }).then(() => {
+              ipcRenderer.send("channel4", "Please let me have the IP address");
+              ipcRenderer.on("channel5", (e, args) => {
+                this.IsConnctedToServer();
+              });
+            });
+          } else if (error && error.response.data.message) {
+            ipcRenderer.send("connectToServer", true);
+            clearInterval(serverConnection);
+          }
+        }
+      }, 1500);
     }
-  }, 1500);
+  });
 };
 
 function ChangeConnctionStatusText() {
@@ -82,12 +105,15 @@ exports.ShutDownApplication = () => {
   });
 };
 
-exports.GetCenterDetails = async (serverIpAddress) => {
-  const path = `http://${serverIpAddress}:${port}/centerDetails`;
-  const res = await axios.get(path);
+exports.GetCenterDetails = () => {
+  ipcRenderer.send("channel4", "lemme have the Ip Address");
+  ipcRenderer.on("channel5", async (e, serverIpAddress) => {
+    const path = `http://${serverIpAddress}:${port}/centerDetails`;
+    const res = await axios.get(path);
 
-  if (res && res.data.centerDetails) {
-    document.querySelector(".centerName").textContent =
-      "Centre Name: " + res.data.centerDetails.centerName;
-  }
+    if (res && res.data.centerDetails) {
+      document.querySelector(".centerName").textContent =
+        "Centre Name: " + res.data.centerDetails.centerName;
+    }
+  });
 };

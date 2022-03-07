@@ -8,8 +8,6 @@ const { LoginCandidate } = require("../../utils/data");
 
 ipcRenderer.send("channel4", "Lemme have the server ip address");
 ipcRenderer.on("channel5", (e, serverIpAddress) => {
-  IsConnctedToServer(serverIpAddress);
-
   document.querySelector(".login").addEventListener("click", login);
 
   window.addEventListener("keydown", function (e) {
@@ -25,5 +23,5 @@ ipcRenderer.on("channel5", (e, serverIpAddress) => {
     LoginCandidate(serverIpAddress, registrationNumber);
   }
 });
-
+IsConnctedToServer();
 ShutDownApplication();

@@ -13,6 +13,10 @@ const {
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain, powerSaveBlocker } =
   electron;
 
+const EventEmitter = require("events");
+
+const emitter = new EventEmitter();
+
 const baseFilePath = "./src/screens/";
 
 let connectToServerScreen,
@@ -245,20 +249,19 @@ function CreateNetworkTestScreen() {
 }
 
 //create the lobby screen
-function CreateLobbyScreen(pageToClose) {
+function CreateLobbyScreen() {
   lobbyScreen = new BrowserWindow({
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
-  if (pageToClose === "networkTest") {
-    networkTestScreen.close();
-    networkTestScreen = null;
-  } else {
-    connectToServerScreen.close();
-    connectToServerScreen = null;
-  }
+
+  BrowserWindow.getAllWindows().forEach((e) => {
+    if (!e.isFocused()) {
+      e.close();
+      e = null;
+    }
+  });
 
   lobbyScreen.fullScreen = true;
-  //lobbyScreen.webContents.toggleDevTools();
 
   lobbyScreen.webContents.on("before-input-event", (event, input) => {
     if (input.code == "F4" && input.alt) event.preventDefault();
@@ -275,13 +278,13 @@ function CreateCandidateLoginScreen(pageToClose) {
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
   //candidateLoginScreen.webContents.toggleDevTools();
-  if (pageToClose === "lobbyScreen") {
-    lobbyScreen.close();
-    lobbyScreen = null;
-  } else if (pageToClose === "networkTest") {
-    networkTestScreen.close();
-    networkTestScreen = null;
-  }
+  BrowserWindow.getAllWindows().forEach((e) => {
+    if (!e.isFocused()) {
+      e.close();
+      e = null;
+    }
+  });
+
   candidateLoginScreen.fullScreen = true;
   //candidateLoginScreen.webContents.toggleDevTools();
   candidateLoginScreen.loadFile(
@@ -317,10 +320,13 @@ ipcMain.on("channel4", (e, args) => {
 });
 
 ipcMain.on("channel6", (e, args) => {
-  if (examinationScreen) {
-    examinationScreen.close();
-    examinationScreen = null;
-  }
+  BrowserWindow.getAllWindows().forEach((e) => {
+    if (!e.isFocused()) {
+      e.close();
+      e = null;
+    }
+  });
+
   CreateCandidateLoginScreen(args);
 });
 
@@ -382,35 +388,24 @@ app.on("ready", function () {
 
 ipcMain.on("connectToServer", (e, args) => {
   if (args) {
-    if (networkTestScreen) {
-      networkTestScreen.close();
-      networkTestScreen = null;
-    }
-    if (candidateLoginScreen) {
-      candidateLoginScreen.close();
-      candidateLoginScreen = null;
-    }
-    if (lobbyScreen) {
-      lobbyScreen.close();
-      lobbyScreen = null;
-    }
+    BrowserWindow.getAllWindows().forEach((e) => {
+      if (!e.isFocused()) {
+        e.close();
+        e = null;
+      }
+    });
     CreateConnectToServerScreen();
   }
 });
 
 ipcMain.on("login", (e, args) => {
-  if (networkTestScreen) {
-    networkTestScreen.close();
-    networkTestScreen = null;
-  }
-  if (candidateLoginScreen) {
-    candidateLoginScreen.close();
-    candidateLoginScreen = null;
-  }
-  if (lobbyScreen) {
-    lobbyScreen.close();
-    lobbyScreen = null;
-  }
+  BrowserWindow.getAllWindows().forEach((e) => {
+    if (!e.isFocused()) {
+      e.close();
+      e = null;
+    }
+  });
+
   CreateExaminationScreen();
 });
 
@@ -431,9 +426,9 @@ app.whenReady().then(() => {
     app.quit();
   });
 
-  globalShortcut.register("Control+Shift+I", () => {
-    BrowserWindow.getFocusedWindow().webContents.toggleDevTools();
-  });
+  // globalShortcut.register("Control+Shift+I", () => {
+  //   BrowserWindow.getFocusedWindow().webContents.toggleDevTools();
+  // });
   globalShortcut.register("Super+Tab", () => {
     app.quit();
   });
@@ -451,18 +446,6 @@ app.on("browser-window-blur", (e) => {
   ipcMain.on("focusedState", (e, args) => {
     e.sender.send("sendMessage", { focused });
   });
-});
-app.once("before-quit", (e) => {
-  e.preventDefault();
-
-  try {
-    BrowserWindow.getFocusedWindow().webContents.send("shutDown", {
-      serverIpAddress,
-      ipAddress: ip.address(),
-    });
-  } catch (error) {
-    app.quit();
-  }
 });
 
 //process.env.NODE_ENV = "development";
