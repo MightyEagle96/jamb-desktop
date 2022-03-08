@@ -34,13 +34,6 @@ exports.LoginCandidate = async (serverIpAddress, registrationNumber) => {
     }
   }
 };
-exports.ServerAdress = "";
-exports.GetAddress = () => {
-  ipcRenderer.send("channel4", "Server Address");
-  ipcRenderer.on("channel5", (e, args) => {
-    localStorage.setItem("serverIpAddress", args);
-  });
-};
 
 exports.SaveAnswers = async (data, serverIpAddress) => {
   data.ipAddress = ip.address();
@@ -51,7 +44,7 @@ exports.SaveAnswers = async (data, serverIpAddress) => {
   } catch (error) {}
 };
 
-exports.FinishExamination = (data, serverIpAddress) => {
+exports.FinishExamination = async (data, serverIpAddress) => {
   const path = `http://${serverIpAddress}:${this.port}/submitExamination`;
 
   try {

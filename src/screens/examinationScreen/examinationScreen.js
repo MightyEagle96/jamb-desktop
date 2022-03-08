@@ -3,11 +3,9 @@ const { default: Swal } = require("sweetalert2");
 
 const {
   SaveAnswers,
-
   FinishExamination,
   LookingOut,
   GetSavedProgress,
-  GetAddress,
 } = require("../../utils/data");
 
 let candidateAnswers = [];
@@ -16,6 +14,12 @@ let timer = 0;
 let timeLeft = 0;
 let hasSubmitted = false;
 
+function GetAddress() {
+  ipcRenderer.send("channel4", "Server Address");
+  ipcRenderer.on("channel5", (e, args) => {
+    localStorage.setItem("serverIpAddress", args);
+  });
+}
 GetAddress();
 const ServerIpAddress = localStorage.getItem("serverIpAddress");
 LookingOut();
