@@ -1,17 +1,13 @@
 const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
 
-const EventEmitter = require("events");
-
-const eventEmitter = new EventEmitter();
-
-eventEmitter.setMaxListeners(0);
 const {
   SaveAnswers,
 
   FinishExamination,
   LookingOut,
   GetSavedProgress,
+  GetAddress,
 } = require("../../utils/data");
 
 let candidateAnswers = [];
@@ -19,6 +15,9 @@ let candidateData = {};
 let timer = 0;
 let timeLeft = 0;
 let hasSubmitted = false;
+
+GetAddress();
+const ServerIpAddress = localStorage.getItem("serverIpAddress");
 LookingOut();
 
 function UpdateTimer(duration) {
@@ -43,7 +42,7 @@ function UpdateTimer(duration) {
       }).then(() => {
         hasSubmitted = true;
 
-        FinishExamination({ candidateData, hasSubmitted });
+        FinishExamination({ candidateData, hasSubmitted }, ServerIpAddress);
       });
     }
   }, 1000);
@@ -424,15 +423,18 @@ ipcRenderer.on("sendQuestions", (e, questions) => {
     subject4.length = GetSubjectLength(subject4.subject.subject.slug);
     subject4.score = CalculateScore(subject4.answers, subject4.length);
 
-    SaveAnswers({
-      candidateData,
-      subject1,
-      subject2,
-      subject3,
-      subject4,
-      timeLeft,
-      hasSubmitted,
-    });
+    SaveAnswers(
+      {
+        candidateData,
+        subject1,
+        subject2,
+        subject3,
+        subject4,
+        timeLeft,
+        hasSubmitted,
+      },
+      ServerIpAddress
+    );
     //update the candidate's question answered counter
     document.querySelector(".answerCounter").textContent =
       candidateAnswers.length;
@@ -628,7 +630,6 @@ setTimeout(() => {
   ipcRenderer.send("GetSavedProgress", "Can I have my progress");
   ipcRenderer.on("MySavedProgress", (e, progress) => {
     if (progress) {
-      console.log(progress);
       const timeRemaining = progress.timeLeft;
 
       UpdateTimer(timeRemaining);

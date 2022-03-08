@@ -34,48 +34,45 @@ exports.LoginCandidate = async (serverIpAddress, registrationNumber) => {
     }
   }
 };
-
-exports.SaveAnswers = (data) => {
-  ipcRenderer.send("channel4", "lemme have the ip address");
-  ipcRenderer.on("channel5", async (e, serverIpAddress) => {
-    if (serverIpAddress) {
-      data.ipAddress = ip.address();
-      const path = `http://${serverIpAddress}:${this.port}/saveCandidateProgress`;
-
-      try {
-        const res = await axios.post(path, data);
-      } catch (error) {}
-    }
+exports.ServerAdress = "";
+exports.GetAddress = () => {
+  ipcRenderer.send("channel4", "Server Address");
+  ipcRenderer.on("channel5", (e, args) => {
+    localStorage.setItem("serverIpAddress", args);
   });
 };
 
-exports.FinishExamination = (data) => {
-  ipcRenderer.send("channel4", "lemme have the ip address");
-  ipcRenderer.on("channel5", async (e, serverIpAddress) => {
-    if (serverIpAddress) {
-      const path = `http://${serverIpAddress}:${this.port}/submitExamination`;
+exports.SaveAnswers = async (data, serverIpAddress) => {
+  data.ipAddress = ip.address();
+  const path = `http://${serverIpAddress}:${this.port}/saveCandidateProgress`;
 
-      try {
-        const res = await axios.post(path, data);
+  try {
+    await axios.post(path, data);
+  } catch (error) {}
+};
 
-        if (res) {
-          Swal.fire({
-            icon: "success",
-            title: "Examination Completed",
-            text: res.data.message,
-          }).then(() => {
-            ipcRenderer.send("storeCandidate", {});
-            ipcRenderer.send("channel6", "close this page");
-            ipcRenderer.send("resetQuestions", []);
-          });
-        }
-      } catch (error) {
-        if (error && error.response) {
-          Swal.fire({ icon: "error", text: error.response.data.message });
-        }
-      }
+exports.FinishExamination = (data, serverIpAddress) => {
+  const path = `http://${serverIpAddress}:${this.port}/submitExamination`;
+
+  try {
+    const res = await axios.post(path, data);
+
+    if (res) {
+      Swal.fire({
+        icon: "success",
+        title: "Examination Completed",
+        text: res.data.message,
+      }).then(() => {
+        ipcRenderer.send("storeCandidate", {});
+        ipcRenderer.send("channel6", "close this page");
+        ipcRenderer.send("resetQuestions", []);
+      });
     }
-  });
+  } catch (error) {
+    if (error && error.response) {
+      Swal.fire({ icon: "error", text: error.response.data.message });
+    }
+  }
 };
 
 exports.GetSavedProgress = async (serverIpAddress, id) => {

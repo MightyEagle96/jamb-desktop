@@ -6,17 +6,15 @@ const ip = require("ip");
 
 const connectionStatus = document.querySelector(".connectionStatus");
 
+let serverAddress = "";
 function GetServerIpAddress() {
-  let serverAddress = "";
   ipcRenderer.send("channel4", "Server IP Address");
   ipcRenderer.on("channel5", (e, args) => {
     serverAddress = args;
   });
-
-  return serverAddress;
 }
 
-const serverIp = GetServerIpAddress();
+GetServerIpAddress();
 
 exports.PerformNetworkTest = () => {
   ipcRenderer.send("channel4", "Server Ip Address");
@@ -44,7 +42,6 @@ exports.IsConnctedToServer = () => {
   ipcRenderer.send("channel4", "Server Ip Address");
   ipcRenderer.on("channel5", (e, serverIpAddress) => {
     if (serverIpAddress) {
-      console.log(serverIpAddress);
       const serverConnection = setInterval(async () => {
         try {
           const path = `http://${serverIpAddress}:${port}/serverConnected`;
