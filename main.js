@@ -299,6 +299,12 @@ function CreateExaminationScreen() {
     webPreferences: { nodeIntegration: true, contextIsolation: false },
   });
   // examinationScreen.webContents.toggleDevTools();
+  BrowserWindow.getAllWindows().forEach((e) => {
+    if (!e.isFocused()) {
+      e.close();
+      e = null;
+    }
+  });
   examinationScreen.fullScreen = true;
   examinationScreen.loadFile(
     `${baseFilePath}examinationScreen/examinationScreen.html`
