@@ -1,6 +1,8 @@
 const { ipcRenderer } = require("electron");
 const { default: Swal } = require("sweetalert2");
 
+const fs = require("fs");
+
 const {
   SaveAnswers,
   FinishExamination,
@@ -8,20 +10,22 @@ const {
   GetSavedProgress,
 } = require("../../utils/data");
 
+let ServerIpAddress = "";
+
+function GetServerAddress() {
+  const readStream = fs.createReadStream("./serverAddress.txt");
+  readStream.on("data", (data) => {
+    ServerIpAddress = JSON.parse(data).serverIpAddress;
+  });
+}
+GetServerAddress();
+
 let candidateAnswers = [];
 let candidateData = {};
 let timer = 0;
 let timeLeft = 0;
 let hasSubmitted = false;
 
-function GetAddress() {
-  ipcRenderer.send("channel4", "Server Address");
-  ipcRenderer.on("channel5", (e, args) => {
-    localStorage.setItem("serverIpAddress", args);
-  });
-}
-GetAddress();
-const ServerIpAddress = localStorage.getItem("serverIpAddress");
 LookingOut();
 
 function UpdateTimer(duration) {

@@ -14,6 +14,7 @@ const { app, BrowserWindow, Menu, globalShortcut, ipcMain, powerSaveBlocker } =
   electron;
 
 const EventEmitter = require("events");
+const { WriteServerString } = require("./trial");
 
 const emitter = new EventEmitter();
 
@@ -310,6 +311,7 @@ ipcMain.on("channel1", (e, args) => {
 
 ipcMain.on("channel3", (e, args) => {
   if (args.serverIp) {
+    WriteServerString({ serverIpAddress: args.serverIp });
     serverIpAddress = args.serverIp;
   }
   CreateLobbyScreen(args.pageToClose);
@@ -332,6 +334,12 @@ ipcMain.on("channel6", (e, args) => {
 
 ipcMain.on("channel7", (e, args) => {
   networkTestDuration = args;
+  BrowserWindow.getAllWindows().forEach((e) => {
+    if (!e.isFocused()) {
+      e.close();
+      e = null;
+    }
+  });
   CreateNetworkTestScreen();
 });
 
