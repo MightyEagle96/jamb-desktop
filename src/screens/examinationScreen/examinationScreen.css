@@ -1,15 +1,14 @@
 body {
   overflow-x: hidden;
 }
+.textGrey {
+  color: #343434;
+}
 .detailsCol {
   height: 100vh;
   /* position: fixed; */
-  background-image: linear-gradient(
-      to right bottom,
-      rgba(11, 63, 18, 0.856),
-      rgba(2, 63, 2, 0.61)
-    ),
-    url("./statusImage.png");
+
+  background-color: rgb(214, 214, 214);
   background-position: center;
 }
 .avatar {
